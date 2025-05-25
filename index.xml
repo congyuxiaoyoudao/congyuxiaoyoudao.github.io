@@ -64,5 +64,12 @@
       <guid>https://congyuxiaoyoudao.github.io/posts/emoji-support/</guid>
       <description>Guide to emoji usage in Hugo</description>
     </item>
+    <item>
+      <title>Nebula</title>
+      <link>https://congyuxiaoyoudao.github.io/nebula/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      <guid>https://congyuxiaoyoudao.github.io/nebula/</guid>
+      <description></description>
+    </item>
   </channel>
 </rss>
