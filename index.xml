@@ -6,15 +6,7 @@
     <description>Recent content on The Only Problem&#39;s Blog</description>
     <generator>Hugo -- 0.147.6</generator>
     <language>zh</language>
-    <lastBuildDate>Fri, 21 Mar 2025 00:00:00 +0000</lastBuildDate>
     <atom:link href="https://congyuxiaoyoudao.github.io/index.xml" rel="self" type="application/rss+xml" />
-    <item>
-      <title>Assignment 1. Analysis of WizMap Scalable Interactive Visualization</title>
-      <link>https://congyuxiaoyoudao.github.io/posts/assignments/analysis-of-wizmap-scalable-interactive-visualization/</link>
-      <pubDate>Fri, 21 Mar 2025 00:00:00 +0000</pubDate>
-      <guid>https://congyuxiaoyoudao.github.io/posts/assignments/analysis-of-wizmap-scalable-interactive-visualization/</guid>
-      <description>本文就原论文分析了交互式可视化工具 WizMap，探讨其如何通过创新的多尺度摘要技术解决大规模机器学习嵌入的可视化和解释难题，并介绍了其用户界面、应用场景及未来发展。</description>
-    </item>
     <item>
       <title>About</title>
       <link>https://congyuxiaoyoudao.github.io/about/</link>
