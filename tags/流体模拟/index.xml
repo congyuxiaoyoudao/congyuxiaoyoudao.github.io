@@ -9,14 +9,13 @@
     <lastBuildDate>Fri, 28 Mar 2025 00:00:00 +0000</lastBuildDate>
     <atom:link href="https://congyuxiaoyoudao.github.io/tags/%E6%B5%81%E4%BD%93%E6%A8%A1%E6%8B%9F/index.xml" rel="self" type="application/rss+xml" />
     <item>
-      <title>a</title>
+      <title></title>
       <link>https://congyuxiaoyoudao.github.io/posts/assignments/assignment-2.-a-review-of-realistic-water-waveform-simulation/</link>
       <pubDate>Fri, 28 Mar 2025 00:00:00 +0000</pubDate>
       <guid>https://congyuxiaoyoudao.github.io/posts/assignments/assignment-2.-a-review-of-realistic-water-waveform-simulation/</guid>
       <description>&lt;blockquote&gt;
 &lt;p&gt;本着虚心交流与接受批评的态度，把这篇用来“应付”学校作业的综述写作放上来，不吝赐教！
-Assignment系列：Assignments/Assignment 2.ReviewOfRealistcWaterRendering/&lt;/p&gt;&lt;/blockquote&gt;
-&lt;p&gt;
+Assignment系列：Assignments/Assignment 2.ReviewOfRealistcWaterRendering/
 
 
 
@@ -25,9 +24,61 @@ Assignment系列：Assignments/Assignment 2.ReviewOfRealistcWaterRendering/&lt;/
 
 
 
-  &lt;a href=&#34;./Assignment%203.%20GAMES202%20Homework%200.md&#34;&gt;b&lt;/a&gt;
 
-&lt;/p&gt;</description>
+  &lt;a href=&#34;./Assignment%203.%20GAMES202%20Homework%200.md&#34;&gt;Assignment 3. GAMES202 Homework 0&lt;/a&gt;
+
+&lt;/p&gt;&lt;/blockquote&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;0x00-to-begin-with&#34;&gt;0x00 To begin with&lt;/h2&gt;
+&lt;p&gt;这篇文章将会包含以下内容：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;input checked=&#34;&#34; disabled=&#34;&#34; type=&#34;checkbox&#34;&gt; 近年来水体波形模拟的主要方法分类介绍&lt;/li&gt;
+&lt;li&gt;&lt;input checked=&#34;&#34; disabled=&#34;&#34; type=&#34;checkbox&#34;&gt; 现有文献的研究趋势分析及未来方向预测&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;strong&gt;For reference&lt;/strong&gt;：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;📖 
+
+
+
+
+
+
+
+
+  &lt;a href=&#34;https://zhuanlan.zhihu.com/p/95917609&#34;&gt;真实感水体渲染技术总结&lt;/a&gt;
+
+&lt;/li&gt;
+&lt;li&gt;📖 
+
+
+
+
+
+
+
+
+  &lt;a href=&#34;https://zhuanlan.zhihu.com/p/672738842&#34;&gt;九、流体模拟简述&lt;/a&gt;
+
+&lt;/li&gt;
+&lt;li&gt;📖 
+
+
+
+
+
+
+
+
+  &lt;a href=&#34;https://zhuanlan.zhihu.com/p/21573239&#34;&gt;游戏中的实时水体模拟技术&lt;/a&gt;
+
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;0x01-摘要&#34;&gt;0x01 摘要&lt;/h2&gt;
+&lt;p&gt;真实感水体模拟因其高度仿真的视觉表现与广泛的应用领域成为计算机图形学的研究热点。本文回顾了近 50 年（1978-2025）来水体模拟的方法，具体而言，包括早期基于经验与统计的方法与参数化波列合成的方法，中期基于物理的数值模拟方法和波粒子方法，以及近年转向数据驱动的深度学习方法。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;关键词&lt;/strong&gt;：流体模拟、波形模拟、深度学习、物理数值方法&lt;/p&gt;
+&lt;p&gt;Realistic water simulation has emerged as a prominent research focus in computer graphics due to its highly realistic visual effects and broad application domains. This paper reviews the methods of water simulation over the past 50 years (1978–2025), specifically including early approaches based on empirical and statistical models, parametric wave synthesis methods, mid-term physics-based numerical simulation techniques and wave particle methods, as well as the recent shift toward data-driven deep learning approaches.&lt;/p&gt;</description>
     </item>
   </channel>
 </rss>
