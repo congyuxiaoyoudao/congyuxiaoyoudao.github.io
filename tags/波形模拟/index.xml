@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
   <channel>
-    <title>The Only Problem&#39;s Blog</title>
-    <link>https://congyuxiaoyoudao.github.io/</link>
-    <description>Recent content on The Only Problem&#39;s Blog</description>
+    <title>波形模拟 on The Only Problem&#39;s Blog</title>
+    <link>https://congyuxiaoyoudao.github.io/tags/%E6%B3%A2%E5%BD%A2%E6%A8%A1%E6%8B%9F/</link>
+    <description>Recent content in 波形模拟 on The Only Problem&#39;s Blog</description>
     <generator>Hugo -- 0.147.7</generator>
     <language>zh</language>
     <lastBuildDate>Fri, 28 Mar 2025 00:00:00 +0000</lastBuildDate>
-    <atom:link href="https://congyuxiaoyoudao.github.io/index.xml" rel="self" type="application/rss+xml" />
+    <atom:link href="https://congyuxiaoyoudao.github.io/tags/%E6%B3%A2%E5%BD%A2%E6%A8%A1%E6%8B%9F/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title></title>
       <link>https://congyuxiaoyoudao.github.io/posts/assignments/a-review-of-realistic-water-waveform-simulation/</link>
@@ -66,37 +66,6 @@
 &lt;p&gt;真实感水体模拟因其高度仿真的视觉表现与广泛的应用领域成为计算机图形学的研究热点。本文回顾了近 50 年（1978-2025）来水体模拟的方法，具体而言，包括早期基于经验与统计的方法与参数化波列合成的方法，中期基于物理的数值模拟方法和波粒子方法，以及近年转向数据驱动的深度学习方法。&lt;/p&gt;
 &lt;p&gt;&lt;strong&gt;关键词&lt;/strong&gt;：流体模拟、波形模拟、深度学习、物理数值方法&lt;/p&gt;
 &lt;p&gt;Realistic water simulation has emerged as a prominent research focus in computer graphics due to its highly realistic visual effects and broad application domains. This paper reviews the methods of water simulation over the past 50 years (1978–2025), specifically including early approaches based on empirical and statistical models, parametric wave synthesis methods, mid-term physics-based numerical simulation techniques and wave particle methods, as well as the recent shift toward data-driven deep learning approaches.&lt;/p&gt;</description>
-    </item>
-    <item>
-      <title>Assignment 1. Analysis of WizMap Scalable Interactive Visualization</title>
-      <link>https://congyuxiaoyoudao.github.io/posts/assignments/analysis-of-wizmap-scalable-interactive-visualization/</link>
-      <pubDate>Fri, 21 Mar 2025 00:00:00 +0000</pubDate>
-      <guid>https://congyuxiaoyoudao.github.io/posts/assignments/analysis-of-wizmap-scalable-interactive-visualization/</guid>
-      <description>本文就原论文分析了交互式可视化工具 WizMap，探讨其如何通过创新的多尺度摘要技术解决大规模机器学习嵌入的可视化和解释难题，并介绍了其用户界面、应用场景及未来发展。</description>
-    </item>
-    <item>
-      <title>About</title>
-      <link>https://congyuxiaoyoudao.github.io/about/</link>
-      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      <guid>https://congyuxiaoyoudao.github.io/about/</guid>
-      <description>&lt;p&gt;&lt;img alt=&#34;Sakurakouji Luna&#34; loading=&#34;lazy&#34; src=&#34;https://raw.gitmirror.com/congyuxiaoyoudao/Picgo-ImageBed/main/Wives/202505260010872.jpg&#34;&gt;&lt;/p&gt;
-&lt;br&gt;
-&lt;p&gt;我喜欢仰望月亮。&lt;/p&gt;
-&lt;br&gt;
-&lt;p&gt;每每沐浴那宛若来自神明的清辉，流动的静谧，澄澈的涤荡，便能够宽赦种种浮躁、不安与愤懑。&lt;/p&gt;
-&lt;br&gt;
-&lt;p&gt;——隐忍之心。含蓄典雅。闲寂幽静。&lt;/p&gt;
-&lt;br&gt;
-&lt;p&gt;平日的生活倒也算称意，辰时而作，子时而息，忙碌于课业的闲暇也有时间钻研自己的兴趣。这般日子确乎不惊波澜，我也默许。&lt;/p&gt;
-&lt;br&gt;
-&lt;p&gt;然而心底总潜藏着对近月之仪的向往，渴望捧起其矜持之下为人所漠视的——无声的冷焰。&lt;/p&gt;</description>
-    </item>
-    <item>
-      <title>Nebula</title>
-      <link>https://congyuxiaoyoudao.github.io/nebula/</link>
-      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      <guid>https://congyuxiaoyoudao.github.io/nebula/</guid>
-      <description></description>
     </item>
   </channel>
 </rss>
