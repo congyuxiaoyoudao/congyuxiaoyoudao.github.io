@@ -4,10 +4,69 @@
     <title>The Only Problem&#39;s Blog</title>
     <link>https://congyuxiaoyoudao.github.io/</link>
     <description>Recent content on The Only Problem&#39;s Blog</description>
-    <generator>Hugo -- 0.147.7</generator>
+    <generator>Hugo -- 0.147.8</generator>
     <language>zh</language>
-    <lastBuildDate>Fri, 28 Mar 2025 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Mon, 07 Apr 2025 00:00:00 +0000</lastBuildDate>
     <atom:link href="https://congyuxiaoyoudao.github.io/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Assignment 3. GAMES202 Homework 0</title>
+      <link>https://congyuxiaoyoudao.github.io/posts/assignments/games202-homework-0/</link>
+      <pubDate>Mon, 07 Apr 2025 00:00:00 +0000</pubDate>
+      <guid>https://congyuxiaoyoudao.github.io/posts/assignments/games202-homework-0/</guid>
+      <description>&lt;blockquote&gt;
+&lt;p&gt;开个新坑，之前囫囵吞枣地过了一遍 202，现在忘得差不多了，该捡起来。正好给枯燥的生活增添一点色彩（？），最近比较忙但还是争取一周做一个作业&lt;/p&gt;&lt;/blockquote&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;-0x00-to-begin-with&#34;&gt;🚩 0x00 To begin with&lt;/h2&gt;
+&lt;p&gt;这篇文章将会包含以下内容：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;input checked=&#34;&#34; disabled=&#34;&#34; type=&#34;checkbox&#34;&gt; GAMES202 作业 0&lt;/li&gt;
+&lt;li&gt;&lt;input checked=&#34;&#34; disabled=&#34;&#34; type=&#34;checkbox&#34;&gt; &lt;strong&gt;不&lt;/strong&gt;包含作业框架分析&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;strong&gt;For reference&lt;/strong&gt;👇：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;📺 B 站视频：
+
+
+
+
+
+
+
+  
+  &lt;a href=&#34;https://www.bilibili.com/video/BV1YK4y1T7yY/?spm_id_from=333.337.top_right_bar_window_custom_collection.content.click&amp;amp;vd_source=b6584cebba3a7a1a34d2f60d63bdc868&#34;&gt;GAMES202-高质量实时渲染&lt;/a&gt;
+
+&lt;/li&gt;
+&lt;li&gt;📦 代码仓库：
+
+
+
+
+
+
+
+  
+  &lt;a href=&#34;https://github.com/congyuxiaoyoudao/GAMES202_Homework/tree/working&#34;&gt;congyuxiaoyoudao/GAMES202_Homework at working&lt;/a&gt;
+
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;blockquote&gt;
+&lt;p&gt;master 分支上是 202 全部作业汇总，working 分支用于提交代码。需要原始作业可下载 master 分支的包&lt;/p&gt;&lt;/blockquote&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;-0x01-configuration-环境配置&#34;&gt;⚙️ 0x01 Configuration 环境配置&lt;/h2&gt;
+&lt;p&gt;选择使用 VSCode 插件搭建本地服务器，在扩展中搜索 Live Server，安装此插件。&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; src=&#34;https://raw.gitmirror.com/congyuxiaoyoudao/Picgo-ImageBed/main/Assignments/Assignment%203.GAMES202HW0/202504072204421.png#center&#34;&gt;&lt;/p&gt;
+&lt;p&gt;在编辑 Html 代码窗口按 F1（或者右键）选择 &lt;strong&gt;Live Server: Open with Live Server&lt;/strong&gt;，随后会自动打开浏览器，导航至本地服务器端口，一切正常的话是下面这个效果：&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; src=&#34;https://raw.gitmirror.com/congyuxiaoyoudao/Picgo-ImageBed/main/Assignments/Assignment%203.GAMES202HW0/202504072210368.png#center&#34;&gt;&lt;/p&gt;
+&lt;p&gt;可以使用鼠标和右上角的控制面板进行一些简单的交互。&lt;/p&gt;
+&lt;p&gt;如果遇到模型贴图加载不出来（只有 202 字样），可以选择多刷新几次。或者直接在加载脚本前预加载贴图，可以根治这个问题。&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-html&#34; data-lang=&#34;html&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;ln&#34;&gt;1&lt;/span&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;p&#34;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;link&lt;/span&gt; &lt;span class=&#34;na&#34;&gt;rel&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;&amp;#34;preload&amp;#34;&lt;/span&gt; &lt;span class=&#34;na&#34;&gt;href&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;&amp;#34;assets/mary/MC003_Kozakura_Mari.png&amp;#34;&lt;/span&gt; &lt;span class=&#34;na&#34;&gt;as&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;&amp;#34;image&amp;#34;&lt;/span&gt; &lt;span class=&#34;na&#34;&gt;type&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;&amp;#34;image/png&amp;#34;&lt;/span&gt; &lt;span class=&#34;na&#34;&gt;crossorigin&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;/&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;hr&gt;
+&lt;h2 id=&#34;-0x02-blinn-phong-shading-model&#34;&gt;🤔 0x02 Blinn-Phong Shading Model&lt;/h2&gt;
+&lt;blockquote&gt;
+&lt;p&gt;没什么好说的，CV 工程师&lt;/p&gt;&lt;/blockquote&gt;
+&lt;h3 id=&#34;使用-glsl-编写-shader&#34;&gt;&lt;strong&gt;使用 GLSL 编写 Shader&lt;/strong&gt;&lt;/h3&gt;
+&lt;p&gt;如果使用字符串的方式引入 Shader，就在 InternalShader.js 中加上：&lt;/p&gt;</description>
+    </item>
     <item>
       <title>Assignment 2. A Review of Realistic Water Waveform Simulation</title>
       <link>https://congyuxiaoyoudao.github.io/posts/assignments/a-review-of-realistic-water-waveform-simulation/</link>
