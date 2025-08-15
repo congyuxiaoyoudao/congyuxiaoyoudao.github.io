@@ -1,0 +1,234 @@
+<!doctype html><html lang=zh dir=auto><head><meta charset=utf-8><meta http-equiv=X-UA-Compatible content="IE=edge"><meta name=viewport content="width=device-width,initial-scale=1,shrink-to-fit=no"><meta name=robots content="index, follow"><title>Assignment 6. GAMES202 Homework 3 | The Only Problem's Blog</title><meta name=keywords content="GAMES202"><meta name=description content="
+HiZ 还在施工中……
+
+0x00 To begin with
+这篇文章将会包含以下内容：
+
+ 部分课程内容回顾
+ GAMES202 作业 3
+
+For reference👇：
+
+📺B 站视频：
+
+
+
+
+
+
+
+  
+  GAMES202-高质量实时渲染
+
+
+📦代码仓库：
+
+
+
+
+
+
+
+  
+  congyuxiaoyoudao/GAMES202_Homework at working
+
+
+
+
+master 分支上是 202 全部作业汇总，working 分支用于提交代码。需要原始作业可下载 master 分支的包
+
+0x01 课程回顾 Recap
+SSR（Screen Space Reflection）是一种基于屏幕空间的反射算法，也被应用于模拟全局光照。因为是屏幕空间的算法，不能且无需像传统全局光照算法那样需要获取场景的原始几何信息，而是只在当前相机的视野范围计算反射，所以效率相对较高，但也存在一些屏幕空间的 Artifacts。
+SSR 算法有两个假设：
+
+屏幕范围内的反射光，其反射源也同样来自屏幕空间的某个像素；
+所有被直接光照亮的物体（在屏幕空间中则表现为像素），都可以作为次级光源参与对反射的贡献；
+
+
+SSR 对反射表面没有要求，即不仅能模拟镜面反射，还可以模拟各种粗糙度的反射
+
+SSR 算法的步骤如下：
+
+对每个需要计算反射的像素沿反射方向发射一条光线；
+沿光线方向步进在屏幕空间中查找深度缓冲并与场景求交；
+若有交点，则将交点颜色作为反射颜色添加到原始像素上；
+
+其中最关键的步骤就是光线求交，最简单的方法就是 Linear RayMarching，光线每次行进一个固定的距离，每次行进后获取该位置的深度值再与场景深度进行比较，如果某次判断光线深度大于场景深度，则认为发生了相交。
+
+当然这种方法的精细度很依赖光线步长，小的步长效果更好但消耗大，反之，更大的步长则可能导致光线“穿过”场景而误判相交，造成错误计算反射的情况。
+为了在提高精度的同时节省开销，研究人员又提出了一种动态步长的方法，即 Hierarchical ray trace。允许光线根据场景信息在行进期间选取不同的步长，例图中光线一开始至少可以以 7 倍的 gap 作为步长，之后再缩减到原始的步长。
+
+说到实时渲染中的一些动态操作，几乎就离不开预处理。同样的，这种方法运行的前提是，光线需要知道行进的“最大安全距离”，即可以迈多大的步子而不与场景发生相交。
+
+这里最大安全距离是类比 SDF 的说法，或者应该说当前层级规定的步长"><meta name=author content="The Only Problem"><link rel=canonical href=https://congyuxiaoyoudao.github.io/posts/assignments/games202-homework-3/><link crossorigin=anonymous href=/assets/css/stylesheet.452758010f0b7fc9ad7fa528ffdfdd8eb9e830816fb8c8119f16f39583297db8.css integrity="sha256-RSdYAQ8Lf8mtf6Uo/9/djrnoMIFvuMgRnxbzlYMpfbg=" rel="preload stylesheet" as=style><link rel=icon href=https://congyuxiaoyoudao.github.io/favicon.ico><link rel=icon type=image/png sizes=16x16 href=https://congyuxiaoyoudao.github.io/favicon-16x16.png><link rel=icon type=image/png sizes=32x32 href=https://congyuxiaoyoudao.github.io/favicon-32x32.png><link rel=apple-touch-icon href=https://congyuxiaoyoudao.github.io/apple-touch-icon.png><link rel=mask-icon href=https://congyuxiaoyoudao.github.io/safari-pinned-tab.svg><meta name=theme-color content="#2e2e33"><meta name=msapplication-TileColor content="#2e2e33"><link rel=alternate hreflang=zh href=https://congyuxiaoyoudao.github.io/posts/assignments/games202-homework-3/><noscript><style>#theme-toggle,.top-link{display:none}</style><style>@media(prefers-color-scheme:dark){:root{--theme:rgb(29, 30, 32);--entry:rgb(46, 46, 51);--primary:rgb(218, 218, 219);--secondary:rgb(155, 156, 157);--tertiary:rgb(65, 66, 68);--content:rgb(196, 196, 197);--code-block-bg:rgb(46, 46, 51);--code-bg:rgb(55, 56, 62);--border:rgb(51, 51, 51)}.list{background:var(--theme)}.list:not(.dark)::-webkit-scrollbar-track{background:0 0}.list:not(.dark)::-webkit-scrollbar-thumb{border-color:var(--theme)}}</style></noscript><link rel=stylesheet href=https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/katex.min.css integrity=sha384-wcIxkf4k558AjM3Yz3BBFQUbk/zgIYC2R0QpeeYb+TwlBVMrlgLqwRjRtGZiK7ww crossorigin=anonymous><script defer src=https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/katex.min.js integrity=sha384-hIoBPJpTUs74ddyc4bFZSM1TVlQDA60VBbJS0oA934VSz82sBx1X7kSx2ATBDIyd crossorigin=anonymous></script><script defer src=https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/contrib/auto-render.min.js integrity=sha384-43gviWU0YVjaDtb/GhzOouOXtZMP/7XUzwPTstBeZFe/+rCMvRwr4yROQP43s0Xk crossorigin=anonymous onload='window.addEventListener("DOMContentLoaded",function(){renderMathInElement(document.body,{delimiters:[{left:"$$",right:"$$",display:!0},{left:"$",right:"$",display:!1},{left:"\\$$",right:"\\\\$$",display:!1},{left:"\\$$",right:"\\\\$$",display:!0}]})})'></script><link rel=preconnect href=https://fonts.googleapis.com><link rel=preconnect href=https://fonts.gstatic.com crossorigin><link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap" rel=stylesheet><link rel=stylesheet href=https://cdn.bootcdn.net/ajax/libs/lxgw-wenkai-screen-webfont/1.7.0/style.min.css><meta property="og:url" content="https://congyuxiaoyoudao.github.io/posts/assignments/games202-homework-3/"><meta property="og:site_name" content="The Only Problem's Blog"><meta property="og:title" content="Assignment 6. GAMES202 Homework 3"><meta property="og:description" content=" HiZ 还在施工中……
+0x00 To begin with 这篇文章将会包含以下内容：
+部分课程内容回顾 GAMES202 作业 3 For reference👇：
+📺B 站视频： GAMES202-高质量实时渲染 📦代码仓库： congyuxiaoyoudao/GAMES202_Homework at working master 分支上是 202 全部作业汇总，working 分支用于提交代码。需要原始作业可下载 master 分支的包
+0x01 课程回顾 Recap SSR（Screen Space Reflection）是一种基于屏幕空间的反射算法，也被应用于模拟全局光照。因为是屏幕空间的算法，不能且无需像传统全局光照算法那样需要获取场景的原始几何信息，而是只在当前相机的视野范围计算反射，所以效率相对较高，但也存在一些屏幕空间的 Artifacts。
+SSR 算法有两个假设：
+屏幕范围内的反射光，其反射源也同样来自屏幕空间的某个像素； 所有被直接光照亮的物体（在屏幕空间中则表现为像素），都可以作为次级光源参与对反射的贡献； SSR 对反射表面没有要求，即不仅能模拟镜面反射，还可以模拟各种粗糙度的反射
+SSR 算法的步骤如下：
+对每个需要计算反射的像素沿反射方向发射一条光线； 沿光线方向步进在屏幕空间中查找深度缓冲并与场景求交； 若有交点，则将交点颜色作为反射颜色添加到原始像素上； 其中最关键的步骤就是光线求交，最简单的方法就是 Linear RayMarching，光线每次行进一个固定的距离，每次行进后获取该位置的深度值再与场景深度进行比较，如果某次判断光线深度大于场景深度，则认为发生了相交。
+当然这种方法的精细度很依赖光线步长，小的步长效果更好但消耗大，反之，更大的步长则可能导致光线“穿过”场景而误判相交，造成错误计算反射的情况。
+为了在提高精度的同时节省开销，研究人员又提出了一种动态步长的方法，即 Hierarchical ray trace。允许光线根据场景信息在行进期间选取不同的步长，例图中光线一开始至少可以以 7 倍的 gap 作为步长，之后再缩减到原始的步长。
+说到实时渲染中的一些动态操作，几乎就离不开预处理。同样的，这种方法运行的前提是，光线需要知道行进的“最大安全距离”，即可以迈多大的步子而不与场景发生相交。
+这里最大安全距离是类比 SDF 的说法，或者应该说当前层级规定的步长"><meta property="og:locale" content="zh"><meta property="og:type" content="article"><meta property="article:section" content="posts"><meta property="article:published_time" content="2025-05-10T00:00:00+00:00"><meta property="article:modified_time" content="2025-05-10T00:00:00+00:00"><meta property="article:tag" content="GAMES202"><meta name=twitter:card content="summary"><meta name=twitter:title content="Assignment 6. GAMES202 Homework 3"><meta name=twitter:description content="
+HiZ 还在施工中……
+
+0x00 To begin with
+这篇文章将会包含以下内容：
+
+ 部分课程内容回顾
+ GAMES202 作业 3
+
+For reference👇：
+
+📺B 站视频：
+
+
+
+
+
+
+
+  
+  GAMES202-高质量实时渲染
+
+
+📦代码仓库：
+
+
+
+
+
+
+
+  
+  congyuxiaoyoudao/GAMES202_Homework at working
+
+
+
+
+master 分支上是 202 全部作业汇总，working 分支用于提交代码。需要原始作业可下载 master 分支的包
+
+0x01 课程回顾 Recap
+SSR（Screen Space Reflection）是一种基于屏幕空间的反射算法，也被应用于模拟全局光照。因为是屏幕空间的算法，不能且无需像传统全局光照算法那样需要获取场景的原始几何信息，而是只在当前相机的视野范围计算反射，所以效率相对较高，但也存在一些屏幕空间的 Artifacts。
+SSR 算法有两个假设：
+
+屏幕范围内的反射光，其反射源也同样来自屏幕空间的某个像素；
+所有被直接光照亮的物体（在屏幕空间中则表现为像素），都可以作为次级光源参与对反射的贡献；
+
+
+SSR 对反射表面没有要求，即不仅能模拟镜面反射，还可以模拟各种粗糙度的反射
+
+SSR 算法的步骤如下：
+
+对每个需要计算反射的像素沿反射方向发射一条光线；
+沿光线方向步进在屏幕空间中查找深度缓冲并与场景求交；
+若有交点，则将交点颜色作为反射颜色添加到原始像素上；
+
+其中最关键的步骤就是光线求交，最简单的方法就是 Linear RayMarching，光线每次行进一个固定的距离，每次行进后获取该位置的深度值再与场景深度进行比较，如果某次判断光线深度大于场景深度，则认为发生了相交。
+
+当然这种方法的精细度很依赖光线步长，小的步长效果更好但消耗大，反之，更大的步长则可能导致光线“穿过”场景而误判相交，造成错误计算反射的情况。
+为了在提高精度的同时节省开销，研究人员又提出了一种动态步长的方法，即 Hierarchical ray trace。允许光线根据场景信息在行进期间选取不同的步长，例图中光线一开始至少可以以 7 倍的 gap 作为步长，之后再缩减到原始的步长。
+
+说到实时渲染中的一些动态操作，几乎就离不开预处理。同样的，这种方法运行的前提是，光线需要知道行进的“最大安全距离”，即可以迈多大的步子而不与场景发生相交。
+
+这里最大安全距离是类比 SDF 的说法，或者应该说当前层级规定的步长"><script type=application/ld+json>{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Posts","item":"https://congyuxiaoyoudao.github.io/posts/"},{"@type":"ListItem","position":2,"name":"Assignments","item":"https://congyuxiaoyoudao.github.io/posts/assignments/"},{"@type":"ListItem","position":3,"name":"Assignment 6. GAMES202 Homework 3","item":"https://congyuxiaoyoudao.github.io/posts/assignments/games202-homework-3/"}]}</script><script type=application/ld+json>{"@context":"https://schema.org","@type":"BlogPosting","headline":"Assignment 6. GAMES202 Homework 3","name":"Assignment 6. GAMES202 Homework 3","description":" HiZ 还在施工中……\n0x00 To begin with 这篇文章将会包含以下内容：\n部分课程内容回顾 GAMES202 作业 3 For reference👇：\n📺B 站视频： GAMES202-高质量实时渲染 📦代码仓库： congyuxiaoyoudao/GAMES202_Homework at working master 分支上是 202 全部作业汇总，working 分支用于提交代码。需要原始作业可下载 master 分支的包\n0x01 课程回顾 Recap SSR（Screen Space Reflection）是一种基于屏幕空间的反射算法，也被应用于模拟全局光照。因为是屏幕空间的算法，不能且无需像传统全局光照算法那样需要获取场景的原始几何信息，而是只在当前相机的视野范围计算反射，所以效率相对较高，但也存在一些屏幕空间的 Artifacts。\nSSR 算法有两个假设：\n屏幕范围内的反射光，其反射源也同样来自屏幕空间的某个像素； 所有被直接光照亮的物体（在屏幕空间中则表现为像素），都可以作为次级光源参与对反射的贡献； SSR 对反射表面没有要求，即不仅能模拟镜面反射，还可以模拟各种粗糙度的反射\nSSR 算法的步骤如下：\n对每个需要计算反射的像素沿反射方向发射一条光线； 沿光线方向步进在屏幕空间中查找深度缓冲并与场景求交； 若有交点，则将交点颜色作为反射颜色添加到原始像素上； 其中最关键的步骤就是光线求交，最简单的方法就是 Linear RayMarching，光线每次行进一个固定的距离，每次行进后获取该位置的深度值再与场景深度进行比较，如果某次判断光线深度大于场景深度，则认为发生了相交。\n当然这种方法的精细度很依赖光线步长，小的步长效果更好但消耗大，反之，更大的步长则可能导致光线“穿过”场景而误判相交，造成错误计算反射的情况。\n为了在提高精度的同时节省开销，研究人员又提出了一种动态步长的方法，即 Hierarchical ray trace。允许光线根据场景信息在行进期间选取不同的步长，例图中光线一开始至少可以以 7 倍的 gap 作为步长，之后再缩减到原始的步长。\n说到实时渲染中的一些动态操作，几乎就离不开预处理。同样的，这种方法运行的前提是，光线需要知道行进的“最大安全距离”，即可以迈多大的步子而不与场景发生相交。\n这里最大安全距离是类比 SDF 的说法，或者应该说当前层级规定的步长\n","keywords":["GAMES202"],"articleBody":" HiZ 还在施工中……\n0x00 To begin with 这篇文章将会包含以下内容：\n部分课程内容回顾 GAMES202 作业 3 For reference👇：\n📺B 站视频： GAMES202-高质量实时渲染 📦代码仓库： congyuxiaoyoudao/GAMES202_Homework at working master 分支上是 202 全部作业汇总，working 分支用于提交代码。需要原始作业可下载 master 分支的包\n0x01 课程回顾 Recap SSR（Screen Space Reflection）是一种基于屏幕空间的反射算法，也被应用于模拟全局光照。因为是屏幕空间的算法，不能且无需像传统全局光照算法那样需要获取场景的原始几何信息，而是只在当前相机的视野范围计算反射，所以效率相对较高，但也存在一些屏幕空间的 Artifacts。\nSSR 算法有两个假设：\n屏幕范围内的反射光，其反射源也同样来自屏幕空间的某个像素； 所有被直接光照亮的物体（在屏幕空间中则表现为像素），都可以作为次级光源参与对反射的贡献； SSR 对反射表面没有要求，即不仅能模拟镜面反射，还可以模拟各种粗糙度的反射\nSSR 算法的步骤如下：\n对每个需要计算反射的像素沿反射方向发射一条光线； 沿光线方向步进在屏幕空间中查找深度缓冲并与场景求交； 若有交点，则将交点颜色作为反射颜色添加到原始像素上； 其中最关键的步骤就是光线求交，最简单的方法就是 Linear RayMarching，光线每次行进一个固定的距离，每次行进后获取该位置的深度值再与场景深度进行比较，如果某次判断光线深度大于场景深度，则认为发生了相交。\n当然这种方法的精细度很依赖光线步长，小的步长效果更好但消耗大，反之，更大的步长则可能导致光线“穿过”场景而误判相交，造成错误计算反射的情况。\n为了在提高精度的同时节省开销，研究人员又提出了一种动态步长的方法，即 Hierarchical ray trace。允许光线根据场景信息在行进期间选取不同的步长，例图中光线一开始至少可以以 7 倍的 gap 作为步长，之后再缩减到原始的步长。\n说到实时渲染中的一些动态操作，几乎就离不开预处理。同样的，这种方法运行的前提是，光线需要知道行进的“最大安全距离”，即可以迈多大的步子而不与场景发生相交。\n这里最大安全距离是类比 SDF 的说法，或者应该说当前层级规定的步长\n一种实现它的方法是预先生成深度图的 Mip-Map，这里四个像素的最小值作为 Mip 生成的逻辑，具体原因涉及到比较的保号性：如果光线与上一级 Mip 都不相交（$D_{ray}","wordCount":"542","inLanguage":"zh","datePublished":"2025-05-10T00:00:00Z","dateModified":"2025-05-10T00:00:00Z","author":{"@type":"Person","name":"The Only Problem"},"mainEntityOfPage":{"@type":"WebPage","@id":"https://congyuxiaoyoudao.github.io/posts/assignments/games202-homework-3/"},"publisher":{"@type":"Organization","name":"The Only Problem's Blog","logo":{"@type":"ImageObject","url":"https://congyuxiaoyoudao.github.io/favicon.ico"}}}</script></head><body id=top><script>localStorage.getItem("pref-theme")==="dark"?document.body.classList.add("dark"):localStorage.getItem("pref-theme")==="light"?document.body.classList.remove("dark"):window.matchMedia("(prefers-color-scheme: dark)").matches&&document.body.classList.add("dark")</script><header class=header><nav class=nav><div class=logo><a href=https://congyuxiaoyoudao.github.io/ accesskey=h title="The Only Problem's Blog (Alt + H)">The Only Problem's Blog</a><div class=logo-switches><button id=theme-toggle accesskey=t title="(Alt + T)" aria-label="Toggle theme">
+<svg id="moon" width="24" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+<svg id="sun" width="24" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg></button></div></div><ul id=menu><li><a href=https://congyuxiaoyoudao.github.io/archives/ title=Archive><span>Archive</span></a></li><li><a href=https://congyuxiaoyoudao.github.io/search/ title="Search (Alt + /)" accesskey=/><span>Search</span></a></li><li><a href=https://congyuxiaoyoudao.github.io/tags/ title=Tags><span>Tags</span></a></li><li><a href=https://congyuxiaoyoudao.github.io/about/ title=About><span>About</span></a></li></ul></nav></header><main class=main><article class=post-single><header class=post-header><div class=breadcrumbs><a href=https://congyuxiaoyoudao.github.io/>主页</a>&nbsp;»&nbsp;<a href=https://congyuxiaoyoudao.github.io/posts/>Posts</a>&nbsp;»&nbsp;<a href=https://congyuxiaoyoudao.github.io/posts/assignments/>Assignments</a></div><h1 class="post-title entry-hint-parent">Assignment 6. GAMES202 Homework 3</h1><div class=post-meta><span title='2025-05-10 00:00:00 +0000 UTC'>五月 10, 2025</span>&nbsp;·&nbsp;3 分钟&nbsp;·&nbsp;The Only Problem</div></header><div class=toc><details><summary accesskey=c title="(Alt + C)"><span class=details>目录</span></summary><div class=inner><ul><li><a href=#0x00-to-begin-with aria-label="0x00 To begin with">0x00 To begin with</a></li><li><a href=#0x01-%e8%af%be%e7%a8%8b%e5%9b%9e%e9%a1%be-recap aria-label="0x01 课程回顾 Recap">0x01 课程回顾 Recap</a></li><li><a href=#0x02-%e7%9b%b4%e6%8e%a5%e5%85%89%e7%85%a7-direct-lighting aria-label="0x02 直接光照 Direct Lighting">0x02 直接光照 Direct Lighting</a></li><li><a href=#0x03-%e5%b1%8f%e5%b9%95%e7%a9%ba%e9%97%b4%e5%85%89%e7%ba%bf%e8%bf%bd%e8%b8%aa-ssr aria-label="0x03 屏幕空间光线追踪 SSR">0x03 屏幕空间光线追踪 SSR</a></li><li><a href=#0x04-%e9%97%b4%e6%8e%a5%e5%85%89%e7%85%a7%e6%98%8e-indirect-lighting aria-label="0x04 间接光照明 Indirect Lighting">0x04 间接光照明 Indirect Lighting</a></li></ul></div></details></div><div class=post-content><blockquote><p>HiZ 还在施工中……</p></blockquote><hr><h2 id=0x00-to-begin-with>0x00 To begin with<a hidden class=anchor aria-hidden=true href=#0x00-to-begin-with>#</a></h2><p>这篇文章将会包含以下内容：</p><ul><li><input checked disabled type=checkbox> 部分课程内容回顾</li><li><input checked disabled type=checkbox> GAMES202 作业 3</li></ul><p><strong>For reference</strong>👇：</p><ul><li>📺B 站视频：
+<a href="https://www.bilibili.com/video/BV1YK4y1T7yY/?spm_id_from=333.337.top_right_bar_window_custom_collection.content.click&amp;vd_source=b6584cebba3a7a1a34d2f60d63bdc868">GAMES202-高质量实时渲染</a></li><li>📦代码仓库：
+<a href=https://github.com/congyuxiaoyoudao/GAMES202_Homework/tree/working>congyuxiaoyoudao/GAMES202_Homework at working</a></li></ul><blockquote><p>master 分支上是 202 全部作业汇总，working 分支用于提交代码。需要原始作业可下载 master 分支的包</p></blockquote><hr><h2 id=0x01-课程回顾-recap>0x01 课程回顾 Recap<a hidden class=anchor aria-hidden=true href=#0x01-课程回顾-recap>#</a></h2><p>SSR（Screen Space Reflection）是一种基于屏幕空间的反射算法，也被应用于模拟全局光照。因为是屏幕空间的算法，不能且无需像传统全局光照算法那样需要获取场景的原始几何信息，而是只在当前相机的视野范围计算反射，所以效率相对较高，但也存在一些屏幕空间的 Artifacts。</p><p>SSR 算法有两个假设：</p><ol><li>屏幕范围内的反射光，其反射源也同样来自屏幕空间的某个像素；</li><li>所有被直接光照亮的物体（在屏幕空间中则表现为像素），都可以作为次级光源参与对反射的贡献；</li></ol><blockquote><p>SSR 对反射表面没有要求，即不仅能模拟镜面反射，还可以模拟各种粗糙度的反射</p></blockquote><p><img alt="重用屏幕空间信息 GAMES202" loading=lazy src=https://raw.gitmirror.com/congyuxiaoyoudao/Picgo-ImageBed/main/Assignments/Assignment%206.GAMES202HW3/202505192155513.png#center></p><p>SSR 算法的步骤如下：</p><ol><li>对每个需要计算反射的像素沿反射方向发射一条光线；</li><li>沿光线方向步进在屏幕空间中查找深度缓冲并与场景求交；</li><li>若有交点，则将交点颜色作为反射颜色添加到原始像素上；</li></ol><p>其中最关键的步骤就是光线求交，最简单的方法就是 Linear RayMarching，光线每次行进一个固定的距离，每次行进后获取该位置的深度值再与场景深度进行比较，如果某次判断光线深度大于场景深度，则认为发生了相交。</p><p><img alt="固定步长的光线步进 GAMES202" loading=lazy src=https://raw.gitmirror.com/congyuxiaoyoudao/Picgo-ImageBed/main/Assignments/Assignment%206.GAMES202HW3/202505192214607.png#center></p><p>当然这种方法的精细度很依赖光线步长，小的步长效果更好但消耗大，反之，更大的步长则可能导致光线“穿过”场景而误判相交，造成错误计算反射的情况。</p><p>为了在提高精度的同时节省开销，研究人员又提出了一种动态步长的方法，即 Hierarchical ray trace。允许光线根据场景信息在行进期间选取不同的步长，例图中光线一开始至少可以以 7 倍的 gap 作为步长，之后再缩减到原始的步长。</p><p><img alt="层级光线追踪 GAMES202" loading=lazy src=https://raw.gitmirror.com/congyuxiaoyoudao/Picgo-ImageBed/main/Assignments/Assignment%206.GAMES202HW3/202505192226586.png#center></p><p>说到实时渲染中的一些动态操作，几乎就离不开预处理。同样的，这种方法运行的前提是，光线需要知道行进的“最大安全距离”，即可以迈多大的步子而不与场景发生相交。</p><blockquote><p>这里最大安全距离是类比 SDF 的说法，或者应该说当前层级规定的步长</p></blockquote><p>一种实现它的方法是预先生成深度图的 Mip-Map，这里四个像素的最小值作为 Mip 生成的逻辑，具体原因涉及到比较的保号性：如果光线与上一级 Mip 都不相交（$D_{ray}&lt;D_{M_{i+1}}$），则其一定与下级不相交（$D_{ray}&lt;any_{4}{D_{M_{i}}}$ ）。</p><p><img alt="深度 Mip-Map GAMES202" loading=lazy src=https://raw.gitmirror.com/congyuxiaoyoudao/Picgo-ImageBed/main/Assignments/Assignment%206.GAMES202HW3/202505192240348.png#center></p><p>拿到这些 Mip 之后就可以对 RayMarching 算法进行改良：一开始仍然以一个比较小的步长，如果行进后没有交点，则下次步进则在上一个层级进行（增加步长）；反之若有交点，则不走这步，回到下一个层级（回退步长）再次尝试步进。</p><blockquote><p>这里层级的上下是基于图像金字塔的位置关系，上面的层级信息更粗糙，下面的层级信息更精细</p></blockquote><p><img alt="层级 Tracing GAMES202" loading=lazy src=https://raw.gitmirror.com/congyuxiaoyoudao/Picgo-ImageBed/main/Assignments/Assignment%206.GAMES202HW3/202505192256982.png#center></p><p>这种层级方法叫做 HiZ（Hierarchical Z-buffer），能够显著减少 RayMarching 的迭代次数。</p><hr><h2 id=0x02-直接光照-direct-lighting>0x02 直接光照 Direct Lighting<a hidden class=anchor aria-hidden=true href=#0x02-直接光照-direct-lighting>#</a></h2><p>直接光照总是比较简单的，而且之前的两个 Pass 已经帮我们把漫反射、世界空间法线和可见性信息（其实就是 ShadowMap）写入了 GBuffer，直接根据屏幕 UV 采样就能获取对应信息。具体而言要完善两个函数：<code>EvalDiffuse</code> 和 <code>EvalDirectionalLight</code>。</p><p><code>EvalDiffuse</code> 函数返回漫反射 BSDF 的值，注意要把 cos 项算进去：</p><p><img loading=lazy src=https://raw.gitmirror.com/congyuxiaoyoudao/Picgo-ImageBed/main/Assignments/Assignment%206.GAMES202HW3/202505101621088.png#center></p><div class=highlight><pre tabindex=0 class=chroma><code class=language-glsl data-lang=glsl><span class=line><span class=ln> 1</span><span class=cl><span class=k>vec3</span> <span class=n>EvalDiffuse</span><span class=p>(</span><span class=k>vec3</span> <span class=n>wi</span><span class=p>,</span> <span class=k>vec3</span> <span class=n>wo</span><span class=p>,</span> <span class=k>vec2</span> <span class=n>uv</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=ln> 2</span><span class=cl>  <span class=k>vec3</span> <span class=n>L</span> <span class=o>=</span> <span class=k>vec3</span><span class=p>(</span><span class=mf>0.0</span><span class=p>);</span>
+</span></span><span class=line><span class=ln> 3</span><span class=cl>
+</span></span><span class=line><span class=ln> 4</span><span class=cl>  <span class=k>vec3</span> <span class=n>rho</span> <span class=o>=</span> <span class=n>GetGBufferDiffuse</span><span class=p>(</span><span class=n>uv</span><span class=p>);</span>
+</span></span><span class=line><span class=ln> 5</span><span class=cl>  <span class=k>vec3</span> <span class=n>normalWS</span> <span class=o>=</span> <span class=n>GetGBufferNormalWorld</span><span class=p>(</span><span class=n>uv</span><span class=p>);</span>
+</span></span><span class=line><span class=ln> 6</span><span class=cl>  
+</span></span><span class=line><span class=ln> 7</span><span class=cl>  <span class=k>float</span> <span class=n>cosTheta</span> <span class=o>=</span> <span class=n>max</span><span class=p>(</span><span class=n>dot</span><span class=p>(</span><span class=n>normalWS</span><span class=p>,</span> <span class=n>wi</span><span class=p>),</span> <span class=mf>0.0</span><span class=p>);</span>
+</span></span><span class=line><span class=ln> 8</span><span class=cl>  <span class=n>L</span> <span class=o>=</span> <span class=n>rho</span> <span class=o>*</span> <span class=n>INV_PI</span> <span class=o>*</span> <span class=n>cosTheta</span><span class=p>;</span>
+</span></span><span class=line><span class=ln> 9</span><span class=cl>
+</span></span><span class=line><span class=ln>10</span><span class=cl>  <span class=k>return</span> <span class=n>L</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>11</span><span class=cl><span class=p>}</span>
+</span></span></code></pre></div><p><code>EvalDirectionalLight</code> 返回 Shading Point 获得的 Light 的 Radience，这里考虑阴影，从 ShadowMap 中获取可见性关系，然后直接和 <code>uLightRadience</code> 相乘即可。</p><p><img loading=lazy src=https://raw.gitmirror.com/congyuxiaoyoudao/Picgo-ImageBed/main/Assignments/Assignment%206.GAMES202HW3/202505101627539.png#center></p><div class=highlight><pre tabindex=0 class=chroma><code class=language-glsl data-lang=glsl><span class=line><span class=ln>1</span><span class=cl><span class=k>vec3</span> <span class=n>EvalDirectionalLight</span><span class=p>(</span><span class=k>vec2</span> <span class=n>uv</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=ln>2</span><span class=cl>  <span class=k>vec3</span> <span class=n>Le</span> <span class=o>=</span> <span class=k>vec3</span><span class=p>(</span><span class=mf>0.0</span><span class=p>);</span>
+</span></span><span class=line><span class=ln>3</span><span class=cl>
+</span></span><span class=line><span class=ln>4</span><span class=cl>  <span class=k>float</span> <span class=n>visibility</span> <span class=o>=</span> <span class=n>GetGBufferuShadow</span><span class=p>(</span><span class=n>uv</span><span class=p>);</span>
+</span></span><span class=line><span class=ln>5</span><span class=cl>  <span class=n>Le</span> <span class=o>=</span> <span class=n>uLightRadiance</span> <span class=o>*</span> <span class=n>visibility</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>6</span><span class=cl>
+</span></span><span class=line><span class=ln>7</span><span class=cl>  <span class=k>return</span> <span class=n>Le</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>8</span><span class=cl><span class=p>}</span>
+</span></span></code></pre></div><p>然后在 <code>main</code> 函数更新一下 <code>L</code> 的计算逻辑：</p><p><img loading=lazy src=https://raw.gitmirror.com/congyuxiaoyoudao/Picgo-ImageBed/main/Assignments/Assignment%206.GAMES202HW3/202505101647046.png#center></p><p><img loading=lazy src=https://raw.gitmirror.com/congyuxiaoyoudao/Picgo-ImageBed/main/Assignments/Assignment%206.GAMES202HW3/202505101652271.png#center></p><hr><h2 id=0x03-屏幕空间光线追踪-ssr>0x03 屏幕空间光线追踪 SSR<a hidden class=anchor aria-hidden=true href=#0x03-屏幕空间光线追踪-ssr>#</a></h2><p><code>RayMarch</code> 函数用来判断采样的光线是否与场景相交，相交时将参数 hitPos 设置为交点，并返回 <code>true</code>。参数 <code>ori</code> 和 <code>dir</code> 分别为世界坐标下光线的起点位置和单位方向向量。</p><p>具体思路是：对于一条给定的射线，记录它的起点和方向，每次迭代时判断当前射线的起点处的深度与 GBuffer 中记录的深度的大小，如果其相减大于预先设定的阈值，则认为光线在该处相交；反之则继续向光线方向前进一段距离。到达最大迭代次数或找到交点时，算法终止。</p><p><img loading=lazy src=https://raw.gitmirror.com/congyuxiaoyoudao/Picgo-ImageBed/main/Assignments/Assignment%206.GAMES202HW3/202505192031056.png#center></p><div class=highlight><pre tabindex=0 class=chroma><code class=language-glsl data-lang=glsl><span class=line><span class=ln> 1</span><span class=cl><span class=cp>#define MAX_ITERATION 100</span>
+</span></span><span class=line><span class=ln> 2</span><span class=cl><span class=cp>#define INTERSECTION_THRESH 1e-5</span>
+</span></span><span class=line><span class=ln> 3</span><span class=cl><span class=cp>#define RAY_STEP 0.02</span>
+</span></span><span class=line><span class=ln> 4</span><span class=cl>
+</span></span><span class=line><span class=ln> 5</span><span class=cl><span class=k>bool</span> <span class=n>RayMarch</span><span class=p>(</span><span class=k>vec3</span> <span class=n>ori</span><span class=p>,</span> <span class=k>vec3</span> <span class=n>dir</span><span class=p>,</span> <span class=k>out</span> <span class=k>vec3</span> <span class=n>hitPos</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=ln> 6</span><span class=cl>  <span class=k>vec3</span> <span class=n>curPos</span> <span class=o>=</span> <span class=n>ori</span><span class=p>;</span>
+</span></span><span class=line><span class=ln> 7</span><span class=cl>  <span class=k>vec3</span> <span class=n>rayStride</span> <span class=o>=</span> <span class=n>normalize</span><span class=p>(</span><span class=n>dir</span><span class=p>)</span> <span class=o>*</span> <span class=n>RAY_STEP</span><span class=p>;</span>
+</span></span><span class=line><span class=ln> 8</span><span class=cl>  
+</span></span><span class=line><span class=ln> 9</span><span class=cl>  <span class=k>for</span><span class=p>(</span><span class=k>int</span> <span class=n>i</span> <span class=o>=</span> <span class=mo>0</span><span class=p>;</span> <span class=n>i</span> <span class=o>&lt;</span> <span class=n>MAX_ITERATION</span><span class=p>;</span> <span class=n>i</span><span class=o>++</span><span class=p>){</span>
+</span></span><span class=line><span class=ln>10</span><span class=cl>    <span class=c1>// get GBuffer infos</span>
+</span></span><span class=line><span class=ln>11</span><span class=cl>    <span class=k>vec2</span> <span class=n>screenUV</span> <span class=o>=</span> <span class=n>GetScreenCoordinate</span><span class=p>(</span><span class=n>curPos</span><span class=p>);</span>
+</span></span><span class=line><span class=ln>12</span><span class=cl>    <span class=k>float</span> <span class=n>rayDepth</span> <span class=o>=</span> <span class=n>GetDepth</span><span class=p>(</span><span class=n>curPos</span><span class=p>);</span>
+</span></span><span class=line><span class=ln>13</span><span class=cl>    <span class=k>float</span> <span class=n>sceneDepth</span> <span class=o>=</span> <span class=n>GetGBufferDepth</span><span class=p>(</span><span class=n>screenUV</span><span class=p>);</span>
+</span></span><span class=line><span class=ln>14</span><span class=cl>
+</span></span><span class=line><span class=ln>15</span><span class=cl>    <span class=c1>// test intersection</span>
+</span></span><span class=line><span class=ln>16</span><span class=cl>    <span class=k>if</span><span class=p>(</span><span class=n>rayDepth</span> <span class=o>-</span> <span class=n>sceneDepth</span> <span class=o>&gt;=</span> <span class=n>INTERSECTION_THRESH</span><span class=p>){</span>
+</span></span><span class=line><span class=ln>17</span><span class=cl>      <span class=n>hitPos</span> <span class=o>=</span> <span class=n>curPos</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>18</span><span class=cl>      <span class=k>return</span> <span class=k>true</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>19</span><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=ln>20</span><span class=cl>    <span class=n>curPos</span> <span class=o>+=</span> <span class=n>rayStride</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>21</span><span class=cl>  <span class=p>}</span>
+</span></span><span class=line><span class=ln>22</span><span class=cl>  <span class=k>return</span> <span class=k>false</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>23</span><span class=cl><span class=p>}</span>
+</span></span></code></pre></div><blockquote><p>这里的参数需要调整至合适值，尤其是步长和阈值</p></blockquote><p>可以写一个函数，假设表面是绝对镜面，检查一下 SSR 的实现，直接返回交点的漫反射颜色作为 SSR 的结果：</p><p><img loading=lazy src=https://raw.gitmirror.com/congyuxiaoyoudao/Picgo-ImageBed/main/Assignments/Assignment%206.GAMES202HW3/202505102056994.png#center></p><div class=highlight><pre tabindex=0 class=chroma><code class=language-glsl data-lang=glsl><span class=line><span class=ln> 1</span><span class=cl><span class=k>vec3</span> <span class=n>EvalSSR</span><span class=p>(</span><span class=k>vec3</span> <span class=n>wi</span><span class=p>,</span> <span class=k>vec3</span> <span class=n>wo</span><span class=p>,</span> <span class=k>vec2</span> <span class=n>uv</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=ln> 2</span><span class=cl> <span class=k>vec3</span> <span class=n>L</span> <span class=o>=</span> <span class=k>vec3</span><span class=p>(</span><span class=mf>0.0</span><span class=p>);</span>
+</span></span><span class=line><span class=ln> 3</span><span class=cl> 
+</span></span><span class=line><span class=ln> 4</span><span class=cl> <span class=k>vec3</span> <span class=n>posWS</span> <span class=o>=</span> <span class=n>vPosWorld</span><span class=p>.</span><span class=n>xyz</span><span class=p>;</span>
+</span></span><span class=line><span class=ln> 5</span><span class=cl> <span class=k>vec3</span> <span class=n>normalWS</span> <span class=o>=</span> <span class=n>GetGBufferNormalWorld</span><span class=p>(</span><span class=n>uv</span><span class=p>);</span>
+</span></span><span class=line><span class=ln> 6</span><span class=cl> <span class=k>vec3</span> <span class=n>reflectDir</span> <span class=o>=</span> <span class=n>normalize</span><span class=p>(</span><span class=n>reflect</span><span class=p>(</span><span class=o>-</span><span class=n>wo</span><span class=p>,</span> <span class=n>normalWS</span><span class=p>));</span>
+</span></span><span class=line><span class=ln> 7</span><span class=cl> <span class=k>vec3</span> <span class=n>hitPos</span> <span class=o>=</span> <span class=k>vec3</span><span class=p>(</span><span class=mf>0.0</span><span class=p>);</span>
+</span></span><span class=line><span class=ln> 8</span><span class=cl>
+</span></span><span class=line><span class=ln> 9</span><span class=cl> <span class=k>if</span><span class=p>(</span><span class=n>RayMarch</span><span class=p>(</span><span class=n>posWS</span><span class=p>,</span> <span class=n>reflectDir</span><span class=p>,</span> <span class=n>hitPos</span><span class=p>)){</span>
+</span></span><span class=line><span class=ln>10</span><span class=cl>  <span class=k>vec2</span> <span class=n>screenReflectUV</span> <span class=o>=</span> <span class=n>GetScreenCoordinate</span><span class=p>(</span><span class=n>hitPos</span><span class=p>);</span>
+</span></span><span class=line><span class=ln>11</span><span class=cl>  <span class=n>L</span> <span class=o>=</span> <span class=n>GetGBufferDiffuse</span><span class=p>(</span><span class=n>screenReflectUV</span><span class=p>);</span>
+</span></span><span class=line><span class=ln>12</span><span class=cl> <span class=p>}</span>
+</span></span><span class=line><span class=ln>13</span><span class=cl>
+</span></span><span class=line><span class=ln>14</span><span class=cl> <span class=k>return</span> <span class=n>L</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>15</span><span class=cl><span class=p>}</span>
+</span></span></code></pre></div><p><code>main</code> 函数中再将这个镜反射的贡献加上，最终的效果应该是这样的，可以看到是正确反射了地面的颜色：</p><p><img loading=lazy src=https://raw.gitmirror.com/congyuxiaoyoudao/Picgo-ImageBed/main/Assignments/Assignment%206.GAMES202HW3/202505102102885.png#center></p><hr><h2 id=0x04-间接光照明-indirect-lighting>0x04 间接光照明 Indirect Lighting<a hidden class=anchor aria-hidden=true href=#0x04-间接光照明-indirect-lighting>#</a></h2><p>这块的逻辑伪代码也给得很清楚了，要注意的有两个点：</p><ol><li>两个采样函数返回的向量位于局部/球面/切线坐标系下，需要变换到世界坐标；</li><li>所有 RayMarching 找到的交点都视为次级光源，次级光源的 <code>wi</code> 为直接光方向（因为是 Directionnal Light），<code>wo</code> 为投射光线的逆（相当次级光照）；</li></ol><p>对于 1，框架中给出了 <code>LocalBasis</code> 用于计算局部空间中的基向量，给定法线 <code>n</code>，即可构造出局部空间到世界空间的变换矩阵 <code>TBN</code>；至于 2，对次级光源调用 <code>EvalDiffuse</code> 时分别对应设置其 <code>wi</code> 和 <code>wo</code> 即可。</p><p><img loading=lazy src=https://raw.gitmirror.com/congyuxiaoyoudao/Picgo-ImageBed/main/Assignments/Assignment%206.GAMES202HW3/202505192030778.png#center></p><div class=highlight><pre tabindex=0 class=chroma><code class=language-glsl data-lang=glsl><span class=line><span class=ln> 1</span><span class=cl><span class=k>vec3</span> <span class=n>EvalIndirectLight</span><span class=p>(</span><span class=k>vec3</span> <span class=n>wi</span><span class=p>,</span> <span class=k>vec3</span> <span class=n>wo</span><span class=p>,</span> <span class=k>vec2</span> <span class=n>uv</span><span class=p>,</span> <span class=k>float</span> <span class=n>s</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=ln> 2</span><span class=cl>  <span class=k>vec3</span> <span class=n>Li</span><span class=p>,</span><span class=n>L</span> <span class=o>=</span> <span class=k>vec3</span><span class=p>(</span><span class=mf>0.0</span><span class=p>);</span>
+</span></span><span class=line><span class=ln> 3</span><span class=cl>
+</span></span><span class=line><span class=ln> 4</span><span class=cl>  <span class=c1>// load TBN matrix</span>
+</span></span><span class=line><span class=ln> 5</span><span class=cl>  <span class=k>vec3</span> <span class=n>n</span> <span class=o>=</span> <span class=n>GetGBufferNormalWorld</span><span class=p>(</span><span class=n>uv</span><span class=p>);</span>
+</span></span><span class=line><span class=ln> 6</span><span class=cl>  <span class=k>vec3</span> <span class=n>t</span><span class=p>,</span> <span class=n>b</span><span class=p>;</span>
+</span></span><span class=line><span class=ln> 7</span><span class=cl>  <span class=n>LocalBasis</span><span class=p>(</span><span class=n>n</span><span class=p>,</span> <span class=n>t</span><span class=p>,</span> <span class=n>b</span><span class=p>);</span>
+</span></span><span class=line><span class=ln> 8</span><span class=cl>  <span class=n>mat3</span> <span class=n>TBN</span> <span class=o>=</span> <span class=n>mat3</span><span class=p>(</span><span class=n>t</span><span class=p>,</span><span class=n>b</span><span class=p>,</span><span class=n>n</span><span class=p>);</span>
+</span></span><span class=line><span class=ln> 9</span><span class=cl>
+</span></span><span class=line><span class=ln>10</span><span class=cl>  <span class=k>float</span> <span class=n>pdf</span> <span class=o>=</span> <span class=mf>0.0</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>11</span><span class=cl>  <span class=k>vec3</span> <span class=n>ori</span> <span class=o>=</span> <span class=n>vPosWorld</span><span class=p>.</span><span class=n>xyz</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>12</span><span class=cl>  <span class=k>vec3</span> <span class=n>hitPos</span> <span class=o>=</span> <span class=k>vec3</span><span class=p>(</span><span class=mf>0.0</span><span class=p>);</span>
+</span></span><span class=line><span class=ln>13</span><span class=cl>  <span class=k>vec2</span> <span class=n>screenIndirectUV</span> <span class=o>=</span> <span class=k>vec2</span><span class=p>(</span><span class=mf>0.0</span><span class=p>);</span>
+</span></span><span class=line><span class=ln>14</span><span class=cl>
+</span></span><span class=line><span class=ln>15</span><span class=cl>  <span class=k>for</span><span class=p>(</span><span class=k>int</span> <span class=n>i</span><span class=o>=</span><span class=mo>0</span><span class=p>;</span> <span class=n>i</span><span class=o>&lt;</span><span class=n>SAMPLE_NUM</span><span class=p>;</span> <span class=n>i</span><span class=o>++</span><span class=p>){</span>
+</span></span><span class=line><span class=ln>16</span><span class=cl>    <span class=c1>// transform from tangent space to world space</span>
+</span></span><span class=line><span class=ln>17</span><span class=cl>    <span class=c1>// this ray cast from pos0 to pos1</span>
+</span></span><span class=line><span class=ln>18</span><span class=cl>    <span class=c1>// pos1 also serve as a light source</span>
+</span></span><span class=line><span class=ln>19</span><span class=cl>    <span class=k>vec3</span> <span class=n>rayDir</span> <span class=o>=</span> <span class=n>normalize</span><span class=p>(</span><span class=n>TBN</span> <span class=o>*</span> <span class=n>SampleHemisphereCos</span><span class=p>(</span><span class=n>s</span><span class=p>,</span><span class=n>pdf</span><span class=p>));</span>
+</span></span><span class=line><span class=ln>20</span><span class=cl>
+</span></span><span class=line><span class=ln>21</span><span class=cl>    <span class=k>if</span><span class=p>(</span><span class=n>RayMarch</span><span class=p>(</span><span class=n>ori</span><span class=p>,</span><span class=n>rayDir</span><span class=p>,</span><span class=n>hitPos</span><span class=p>)){</span>
+</span></span><span class=line><span class=ln>22</span><span class=cl>      <span class=n>screenIndirectUV</span> <span class=o>=</span> <span class=n>GetScreenCoordinate</span><span class=p>(</span><span class=n>hitPos</span><span class=p>);</span>
+</span></span><span class=line><span class=ln>23</span><span class=cl>      <span class=c1>// light is directional hence for each shading point uses the same wi for lightDir</span>
+</span></span><span class=line><span class=ln>24</span><span class=cl>      <span class=n>L</span> <span class=o>=</span> <span class=n>EvalDiffuse</span><span class=p>(</span><span class=n>rayDir</span><span class=p>,</span><span class=n>wo</span><span class=p>,</span><span class=n>uv</span><span class=p>)</span><span class=o>/</span><span class=n>pdf</span> <span class=o>*</span> <span class=n>EvalDiffuse</span><span class=p>(</span><span class=n>wi</span><span class=p>,</span><span class=o>-</span><span class=n>rayDir</span><span class=p>,</span><span class=n>screenIndirectUV</span><span class=p>)</span> <span class=o>*</span> <span class=n>EvalDirectionalLight</span><span class=p>(</span><span class=n>screenIndirectUV</span><span class=p>);</span>
+</span></span><span class=line><span class=ln>25</span><span class=cl>      <span class=n>Li</span> <span class=o>+=</span> <span class=n>L</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>26</span><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=ln>27</span><span class=cl>
+</span></span><span class=line><span class=ln>28</span><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=ln>29</span><span class=cl>
+</span></span><span class=line><span class=ln>30</span><span class=cl>  <span class=n>Li</span> <span class=o>/=</span> <span class=k>float</span><span class=p>(</span><span class=n>SAMPLE_NUM</span><span class=p>);</span>
+</span></span><span class=line><span class=ln>31</span><span class=cl>  <span class=k>return</span> <span class=n>Li</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>32</span><span class=cl><span class=p>}</span>
+</span></span></code></pre></div><p>一切正常的话可以换个场景看看效果，engine.js 中，修改以下几处地方：</p><p>更换光源信息（65-71 行）和加载的模型（90 行）：</p><p><img loading=lazy src=https://raw.gitmirror.com/congyuxiaoyoudao/Picgo-ImageBed/main/Assignments/Assignment%206.GAMES202HW3/202505192052949.png#center></p><p>更换摄像机位置（34-35 行）：</p><p><img loading=lazy src=https://raw.gitmirror.com/congyuxiaoyoudao/Picgo-ImageBed/main/Assignments/Assignment%206.GAMES202HW3/202505192054494.png#center></p><p>去到网页就能看到大概这样的效果，可以看到暗部也有不错的间接光效果，如果觉得噪点太多可以修改采样数或 RayMarching 的参数，但是配置太精细网页会比较卡。</p><p><img alt="采样数为 50 的结果" loading=lazy src=https://raw.gitmirror.com/congyuxiaoyoudao/Picgo-ImageBed/main/Assignments/Assignment%206.GAMES202HW3/202505102222442.png#center></p></div><footer class=post-footer><ul class=post-tags><li><a href=https://congyuxiaoyoudao.github.io/tags/games202/>GAMES202</a></li></ul><nav class=paginav><a class=next href=https://congyuxiaoyoudao.github.io/posts/assignments/games202-homework-2/><span class=title>下一页 »</span><br><span>Assignment 5. GAMES202 Homework 2</span></a></nav></footer><div id=tw-comment></div><script>const getStoredTheme=()=>localStorage.getItem("pref-theme")==="light"?"light":"noborder_dark",setGiscusTheme=()=>{const e=e=>{const t=document.querySelector("iframe.giscus-frame");t&&t.contentWindow.postMessage({giscus:e},"https://giscus.app")};e({setConfig:{theme:getStoredTheme()}})};document.addEventListener("DOMContentLoaded",()=>{const s={src:"https://giscus.app/client.js","data-repo":"congyuxiaoyoudao/congyuxiaoyoudao.github.io","data-repo-id":"","data-category":"Announcements","data-category-id":"","data-mapping":"pathname","data-strict":"0","data-reactions-enabled":"","data-emit-metadata":"","data-input-position":"","data-theme":getStoredTheme(),"data-lang":"zh-CN","data-loading":"lazy",crossorigin:"anonymous"},e=document.createElement("script");Object.entries(s).forEach(([t,n])=>e.setAttribute(t,n)),document.querySelector("#tw-comment").appendChild(e);const t=document.querySelector("#theme-toggle");t&&t.addEventListener("click",setGiscusTheme);const n=document.querySelector("#theme-toggle-float");n&&n.addEventListener("click",setGiscusTheme)})</script></article></main><footer class=footer><span>&copy; 2025 <a href=https://congyuxiaoyoudao.github.io/>The Only Problem's Blog</a></span> ·
+<span>Powered by
+<a href=https://gohugo.io/ rel="noopener noreferrer" target=_blank>Hugo</a> &
+<a href=https://github.com/adityatelange/hugo-PaperMod/ rel=noopener target=_blank>PaperMod</a></span></footer><a href=#top aria-label="go to top" title="Go to Top (Alt + G)" class=top-link id=top-link accesskey=g><svg viewBox="0 0 12 6" fill="currentColor"><path d="M12 6H0l6-6z"/></svg>
+</a><script>let menu=document.getElementById("menu");menu&&(menu.scrollLeft=localStorage.getItem("menu-scroll-position"),menu.onscroll=function(){localStorage.setItem("menu-scroll-position",menu.scrollLeft)}),document.querySelectorAll('a[href^="#"]').forEach(e=>{e.addEventListener("click",function(e){e.preventDefault();var t=this.getAttribute("href").substr(1);window.matchMedia("(prefers-reduced-motion: reduce)").matches?document.querySelector(`[id='${decodeURIComponent(t)}']`).scrollIntoView():document.querySelector(`[id='${decodeURIComponent(t)}']`).scrollIntoView({behavior:"smooth"}),t==="top"?history.replaceState(null,null," "):history.pushState(null,null,`#${t}`)})})</script><script>var mybutton=document.getElementById("top-link");window.onscroll=function(){document.body.scrollTop>800||document.documentElement.scrollTop>800?(mybutton.style.visibility="visible",mybutton.style.opacity="1"):(mybutton.style.visibility="hidden",mybutton.style.opacity="0")}</script><script>document.getElementById("theme-toggle").addEventListener("click",()=>{document.body.className.includes("dark")?(document.body.classList.remove("dark"),localStorage.setItem("pref-theme","light")):(document.body.classList.add("dark"),localStorage.setItem("pref-theme","dark"))})</script><script>document.querySelectorAll("pre > code").forEach(e=>{const n=e.parentNode.parentNode,t=document.createElement("button");t.classList.add("copy-code"),t.innerHTML="复制";function s(){t.innerHTML="已复制！",setTimeout(()=>{t.innerHTML="复制"},2e3)}t.addEventListener("click",t=>{if("clipboard"in navigator){navigator.clipboard.writeText(e.textContent),s();return}const n=document.createRange();n.selectNodeContents(e);const o=window.getSelection();o.removeAllRanges(),o.addRange(n);try{document.execCommand("copy"),s()}catch{}o.removeRange(n)}),n.classList.contains("highlight")?n.appendChild(t):n.parentNode.firstChild==n||(e.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName=="TABLE"?e.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(t):e.parentNode.appendChild(t))})</script></body></html>
