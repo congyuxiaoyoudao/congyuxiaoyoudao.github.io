@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>BRDF on The Only Problem&#39;s Blog</title>
+    <link>https://congyuxiaoyoudao.github.io/tags/brdf/</link>
+    <description>Recent content in BRDF on The Only Problem&#39;s Blog</description>
+    <generator>Hugo -- 0.148.2</generator>
+    <language>zh</language>
+    <lastBuildDate>Sat, 14 Jun 2025 00:00:00 +0000</lastBuildDate>
+    <atom:link href="https://congyuxiaoyoudao.github.io/tags/brdf/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Assignment 7. GAMES202 Homework 4</title>
+      <link>https://congyuxiaoyoudao.github.io/posts/assignments/games202-homework-4/</link>
+      <pubDate>Sat, 14 Jun 2025 00:00:00 +0000</pubDate>
+      <guid>https://congyuxiaoyoudao.github.io/posts/assignments/games202-homework-4/</guid>
+      <description>&lt;blockquote&gt;
+&lt;p&gt;好久不见！最近在忙别的工作，这几天难得有时间，赶紧把 202 系列作业做个收尾ε٩(๑&amp;gt; ₃ &amp;lt;)۶з！&lt;/p&gt;&lt;/blockquote&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;0x00-to-begin-with&#34;&gt;0x00 To begin with&lt;/h2&gt;
+&lt;p&gt;这篇文章将会包含以下内容：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;input checked=&#34;&#34; disabled=&#34;&#34; type=&#34;checkbox&#34;&gt; 部分课程内容回顾&lt;/li&gt;
+&lt;li&gt;&lt;input checked=&#34;&#34; disabled=&#34;&#34; type=&#34;checkbox&#34;&gt; GAMES202 作业 4&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;strong&gt;For reference&lt;/strong&gt;👇：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;📺B 站视频：
+
+
+
+
+
+
+
+  
+  &lt;a href=&#34;https://www.bilibili.com/video/BV1YK4y1T7yY/?spm_id_from=333.337.top_right_bar_window_custom_collection.content.click&amp;amp;vd_source=b6584cebba3a7a1a34d2f60d63bdc868&#34;&gt;GAMES202-高质量实时渲染&lt;/a&gt;
+
+&lt;/li&gt;
+&lt;li&gt;📦代码仓库：
+
+
+
+
+
+
+
+  
+  &lt;a href=&#34;https://github.com/congyuxiaoyoudao/GAMES202_Homework/tree/working&#34;&gt;congyuxiaoyoudao/GAMES202_Homework at working&lt;/a&gt;
+
+&lt;/li&gt;
+&lt;li&gt;📃 
+
+
+
+
+
+
+
+  
+  &lt;a href=&#34;https://blog.selfshadow.com/publications/s2017-shading-course/imageworks/s2017_pbs_imageworks_slides_v2.pdf&#34;&gt;Revisiting Physically Based Shading at Imageworks&lt;/a&gt;
+
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;blockquote&gt;
+&lt;p&gt;master 分支上是 202 全部作业汇总，working 分支用于提交代码。需要原始作业可下载 master 分支的包&lt;/p&gt;&lt;/blockquote&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;0x01-课程回顾-recap&#34;&gt;0x01 课程回顾 Recap&lt;/h2&gt;
+&lt;h3 id=&#34;能量守恒的-bsdf-energy-preserving-bsdfs&#34;&gt;能量守恒的 BSDF Energy-Preserving BSDFs&lt;/h3&gt;
+&lt;p&gt;Cook-Torrance 提出的微表面 BRDF 只考虑光线在表面经过一次弹射后出射到观察方向的能量，然而忽略了多次弹射最终出射到观察方向的能量，这就造成了能量损失。尤其是当材质的 roughness 较高时，G 项减小，多次弹射的比例增加，能量损失越严重。&lt;/p&gt;
+&lt;p&gt;&lt;img alt=&#34;Missing Energy of Microfacet BRDF, Revisiting Physically Based Shading at Imageworks, SIGGRAPH 2017&#34; loading=&#34;lazy&#34; src=&#34;https://raw.gitmirror.com/congyuxiaoyoudao/Picgo-ImageBed/main/Assignments/Assignment%207.GAMES202HW4/202506151740381.png#center&#34;&gt;&lt;/p&gt;
+&lt;p&gt;2017 年 Kulla 和 Conty 受到 Disney Principle BRDF 的启发，提出了一种改进的方法，即通过引入一个能量补偿项，将多次弹射出射到观察方向的能量补充回来，就能近似地保持能量守恒。&lt;/p&gt;</description>
+    </item>
+  </channel>
+</rss>
