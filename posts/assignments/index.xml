@@ -6,8 +6,92 @@
     <description>Recent content in Assignments on The Only Problem&#39;s Blog</description>
     <generator>Hugo -- 0.148.2</generator>
     <language>zh</language>
-    <lastBuildDate>Sat, 14 Jun 2025 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Mon, 16 Jun 2025 00:00:00 +0000</lastBuildDate>
     <atom:link href="https://congyuxiaoyoudao.github.io/posts/assignments/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Assignment 8. GAMES202 Homework 5</title>
+      <link>https://congyuxiaoyoudao.github.io/posts/assignments/games202-homework-5/</link>
+      <pubDate>Mon, 16 Jun 2025 00:00:00 +0000</pubDate>
+      <guid>https://congyuxiaoyoudao.github.io/posts/assignments/games202-homework-5/</guid>
+      <description>&lt;blockquote&gt;
+&lt;p&gt;202 系列完结撒花 ✿✿ヽ(°▽°)ノ✿！&lt;/p&gt;&lt;/blockquote&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;0x00-to-begin-with&#34;&gt;0x00 To begin with&lt;/h2&gt;
+&lt;p&gt;这篇文章将会包含以下内容：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;input checked=&#34;&#34; disabled=&#34;&#34; type=&#34;checkbox&#34;&gt; 部分课程内容回顾&lt;/li&gt;
+&lt;li&gt;&lt;input checked=&#34;&#34; disabled=&#34;&#34; type=&#34;checkbox&#34;&gt; GAMES202 作业 5&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;strong&gt;For reference&lt;/strong&gt;👇：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;📺B 站视频：
+
+
+
+
+
+
+
+  
+  &lt;a href=&#34;https://www.bilibili.com/video/BV1YK4y1T7yY/?spm_id_from=333.337.top_right_bar_window_custom_collection.content.click&amp;amp;vd_source=b6584cebba3a7a1a34d2f60d63bdc868&#34;&gt;GAMES202-高质量实时渲染&lt;/a&gt;
+
+&lt;/li&gt;
+&lt;li&gt;📦代码仓库：
+
+
+
+
+
+
+
+  
+  &lt;a href=&#34;https://github.com/congyuxiaoyoudao/GAMES202_Homework/tree/working&#34;&gt;congyuxiaoyoudao/GAMES202_Homework at working&lt;/a&gt;
+
+&lt;/li&gt;
+&lt;li&gt;
+
+
+
+
+
+
+
+  
+  &lt;a href=&#34;https://games-cn.org/forums/topic/zuoye5fabugonggao/&#34;&gt;作业5发布公告及场景下载&lt;/a&gt;
+
+&lt;/li&gt;
+&lt;li&gt;📖
+
+
+
+
+
+
+
+  
+  &lt;a href=&#34;https://zhuanlan.zhihu.com/p/607012514&#34;&gt;GAMES202-作业5：实时光线追踪降噪&lt;/a&gt;
+
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;blockquote&gt;
+&lt;p&gt;master 分支上是 202 全部作业汇总，working 分支用于提交代码。需要原始作业可下载 master 分支的包&lt;/p&gt;&lt;/blockquote&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;0x01-问题修复-troubleshooting&#34;&gt;0x01 问题修复 TroubleShooting&lt;/h2&gt;
+&lt;p&gt;做作业时遇到一些出现问题的地方，这里一并提一下：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;运行 build.bat 后 build 目录下没有出现可执行文件&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;ReadFloatImage&lt;/code&gt; 方法报错&lt;/li&gt;
+&lt;li&gt;mathutil.h 中 &lt;code&gt;uint32_t&lt;/code&gt; was not declared in this scope&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;第一个问题纯属对 Cmake 不熟练，build.bat 提供的命令只是生成工程文件，要运行构建还需要如下命令（或者直接用 VS 等 IDE 运行）：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;ln&#34;&gt;1&lt;/span&gt;&lt;span class=&#34;cl&#34;&gt;cmake --build build
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;这里为了简化运行操作，新增了一个 run.bat：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;ln&#34;&gt;1&lt;/span&gt;&lt;span class=&#34;cl&#34;&gt;cmake --build build
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;ln&#34;&gt;2&lt;/span&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;nb&#34;&gt;cd&lt;/span&gt; build
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;ln&#34;&gt;3&lt;/span&gt;&lt;span class=&#34;cl&#34;&gt;Denoise.exe
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;ln&#34;&gt;4&lt;/span&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;nb&#34;&gt;cd&lt;/span&gt; ..
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;第二个问题为路径错误，下载完场景后我的根目录文件结构如下：&lt;/p&gt;</description>
+    </item>
     <item>
       <title>Assignment 7. GAMES202 Homework 4</title>
       <link>https://congyuxiaoyoudao.github.io/posts/assignments/games202-homework-4/</link>
