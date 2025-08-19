@@ -494,6 +494,61 @@ $$&lt;/div&gt;
       <description>本文就原论文分析了交互式可视化工具 WizMap，探讨其如何通过创新的多尺度摘要技术解决大规模机器学习嵌入的可视化和解释难题，并介绍了其用户界面、应用场景及未来发展。</description>
     </item>
     <item>
+      <title>Interlude 1. ToonIntergratedBxDF</title>
+      <link>https://congyuxiaoyoudao.github.io/posts/interludes/toon-intergrated-bxdf/</link>
+      <pubDate>Tue, 11 Mar 2025 00:00:00 +0000</pubDate>
+      <guid>https://congyuxiaoyoudao.github.io/posts/interludes/toon-intergrated-bxdf/</guid>
+      <description>&lt;blockquote&gt;
+&lt;p&gt;之前的几篇文章中，我们已经完成了Toon模型一些基本的Feature。在深入定制之前，我们必须冷静下来思考一下我们需要什么&lt;/p&gt;&lt;/blockquote&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;-0x00-to-begin-with&#34;&gt;🚩 0x00 To begin with&lt;/h2&gt;
+&lt;p&gt;这篇文章将会包含以下内容：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;input checked=&#34;&#34; disabled=&#34;&#34; type=&#34;checkbox&#34;&gt; 集成卡渲着色模型&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;strong&gt;For reference&lt;/strong&gt;👇：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;📖
+
+
+
+
+
+
+
+  
+  &lt;a href=&#34;https://zhuanlan.zhihu.com/p/690066418&#34;&gt;【UE5】通过深度偏移计算刘海投影&lt;/a&gt;
+
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;-0x02--toonintergratebxdf&#34;&gt;👀 0x02  ToonIntergrateBxDF&lt;/h2&gt;
+&lt;p&gt;目前我们的光照模型只是已经具备了基本的明暗处理，仍然有数量众多的Feature需要去实现（Ramp、SDF、Anisotropic hair、Matcap、眼透等等）。虽然有一小部分可以用一些trick附加在基础色或其它材质槽上，但其余的就无可奈何了。而且不同于Unlit，在底层逻辑写死的情况下，能在材质编辑器中做的工作就比较有限了。&lt;/p&gt;
+&lt;p&gt;一个比较容易想到的方法就是为需要特殊处理的材质单独新建一个着色模型，比如说头发一个、皮肤一个，然后里面各自处理需要的Feature。但着色模型数量是有限的，在不扩展&lt;code&gt;FMaterialShadingModelField&lt;/code&gt;至&lt;code&gt;uint32&lt;/code&gt;的情况下最多只允许16个着色模型。&lt;/p&gt;
+&lt;p&gt;&lt;img alt=&#34;ShadingModelField只有16位&#34; loading=&#34;lazy&#34; src=&#34;https://raw.gitmirror.com/congyuxiaoyoudao/Picgo-ImageBed/main/TA-interludes/Interlude%201.ToonIntegrateBxDF/202503111821380.png#center&#34;&gt;&lt;/p&gt;
+&lt;p&gt;而且这么多模型逐一添加也比较繁琐，我认为不太优雅，所以想到另一个方法。既然我们已经有一个&lt;code&gt;ToonBxDF&lt;/code&gt;，何不仿照&lt;code&gt;IntegrateBxDF&lt;/code&gt;的写法，在里面写个大分支，分发不同Toon材质的情况呢？&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; src=&#34;https://raw.gitmirror.com/congyuxiaoyoudao/Picgo-ImageBed/main/TA-interludes/Interlude%201.ToonIntegrateBxDF/202503111821796.png#center&#34;&gt;&lt;/p&gt;
+&lt;p&gt;思路有了，那下一个问题就是，根据什么分发呢？&lt;code&gt;IntegrateBxDF&lt;/code&gt;是根据&lt;code&gt;ShadingModelID&lt;/code&gt;，我们应该也需要一个&lt;code&gt;ToonShadingModelID&lt;/code&gt;。这个时候我想起了之前开辟但没使用过的ToonCustom引脚。现在它被存储在GBuffer的&lt;code&gt;CustomData&lt;/code&gt;的Alpha通道中，我们可以停止放置Play，好好使用它了。&lt;/p&gt;
+&lt;p&gt;&lt;img alt=&#34;CustomData的存储&#34; loading=&#34;lazy&#34; src=&#34;https://raw.gitmirror.com/congyuxiaoyoudao/Picgo-ImageBed/main/TA-interludes/Interlude%201.ToonIntegrateBxDF/202503111821429.png#center&#34;&gt;&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;FGBufferData&lt;/code&gt;中的&lt;code&gt;CustomData&lt;/code&gt;在BasePass中经过编码来到GBufferD，最后输出到MRT[4]或MRT[5]。&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; src=&#34;https://raw.gitmirror.com/congyuxiaoyoudao/Picgo-ImageBed/main/TA-interludes/Interlude%201.ToonIntegrateBxDF/202503111928061.png#center&#34;&gt;&lt;/p&gt;
+&lt;p&gt;类型是&lt;code&gt;float&lt;/code&gt;，（没错，&lt;code&gt;half4&lt;/code&gt;竟然是个宏）。&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; src=&#34;https://raw.gitmirror.com/congyuxiaoyoudao/Picgo-ImageBed/main/TA-interludes/Interlude%201.ToonIntegrateBxDF/202503111822563.png#center&#34;&gt;&lt;/p&gt;
+&lt;p&gt;但是范围只有0~1，由于GBufferTexture的性质，我们在这个引脚输入的任何数值都会被硬件钳制到这个范围。没办法，写个函数转一下吧。&lt;/p&gt;
+&lt;p&gt;&lt;img alt=&#34;将浮点转为ToonShadingModelID&#34; loading=&#34;lazy&#34; src=&#34;https://raw.gitmirror.com/congyuxiaoyoudao/Picgo-ImageBed/main/TA-interludes/Interlude%201.ToonIntegrateBxDF/202503112000369.png#center&#34;&gt;&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-hlsl&#34; data-lang=&#34;hlsl&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;ln&#34;&gt;1&lt;/span&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;kt&#34;&gt;uint&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;DecodeFloatToToonShadingModelID&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;kt&#34;&gt;float&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;SrcFloat&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;  
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;ln&#34;&gt;2&lt;/span&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;  
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;ln&#34;&gt;3&lt;/span&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;k&#34;&gt;return&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;SrcFloat&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;*&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;255&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;  
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;ln&#34;&gt;4&lt;/span&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;UE里面也新写一个材质函数，把正常的ID映射过去，&lt;/p&gt;
+&lt;p&gt;&lt;img alt=&#34;MF_EncodeToonShadingModelIDToFloat&#34; loading=&#34;lazy&#34; src=&#34;https://raw.gitmirror.com/congyuxiaoyoudao/Picgo-ImageBed/main/TA-interludes/Interlude%201.ToonIntegrateBxDF/202503112007292.png#center&#34;&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img alt=&#34;编码后接入自定义引脚&#34; loading=&#34;lazy&#34; src=&#34;https://raw.gitmirror.com/congyuxiaoyoudao/Picgo-ImageBed/main/TA-interludes/Interlude%201.ToonIntegrateBxDF/202503112010055.png#center&#34;&gt;&lt;/p&gt;
+&lt;p&gt;最后在ToonIntergrateBxDF里随便写点东西测试一下，只有当&lt;code&gt;ToonShadingModelID&lt;/code&gt;为0时才有光照计算。&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; src=&#34;https://raw.gitmirror.com/congyuxiaoyoudao/Picgo-ImageBed/main/TA-interludes/Interlude%201.ToonIntegrateBxDF/202503112012801.png#center&#34;&gt;&lt;/p&gt;
+&lt;p&gt;单独把身体的ID设成2看看效果。&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; src=&#34;https://raw.gitmirror.com/congyuxiaoyoudao/Picgo-ImageBed/main/TA-interludes/Interlude%201.ToonIntegrateBxDF/202503112017053.png#center&#34;&gt;&lt;/p&gt;</description>
+    </item>
+    <item>
       <title>About</title>
       <link>https://congyuxiaoyoudao.github.io/about/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
