@@ -428,6 +428,42 @@ $$&lt;/div&gt;
 &lt;p&gt;如果使用字符串的方式引入 Shader，就在 InternalShader.js 中加上：&lt;/p&gt;</description>
     </item>
     <item>
+      <title>Interlude 2. Manga Speed Lines</title>
+      <link>https://congyuxiaoyoudao.github.io/posts/interludes/manga-speed-lines/</link>
+      <pubDate>Mon, 31 Mar 2025 00:00:00 +0000</pubDate>
+      <guid>https://congyuxiaoyoudao.github.io/posts/interludes/manga-speed-lines/</guid>
+      <description>&lt;blockquote&gt;
+&lt;p&gt;偶然用 shader 乱搓出的一个类似漫画风格的放射线效果，实际上还有很多缺陷，权且当思路分享了&lt;/p&gt;&lt;/blockquote&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;-0x00-to-begin-with&#34;&gt;🚩 0x00 To begin with&lt;/h2&gt;
+&lt;p&gt;这篇文章将会包含以下内容：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;input checked=&#34;&#34; disabled=&#34;&#34; type=&#34;checkbox&#34;&gt; 漫画的速度线效果&lt;/li&gt;
+&lt;li&gt;&lt;input checked=&#34;&#34; disabled=&#34;&#34; type=&#34;checkbox&#34;&gt; 基于 blender 着色器的乱糊&lt;/li&gt;
+&lt;/ul&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;-0x01-what-is-radiating-lines&#34;&gt;👀 0x01 What is Radiating Lines&lt;/h2&gt;
+&lt;p&gt;漫画中经常有这种放射线的效果：&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; src=&#34;https://raw.gitmirror.com/congyuxiaoyoudao/Picgo-ImageBed/main/TA-interludes/Interlude%202.MangaSpeedLines/202504021841792.jpg#center&#34;&gt;&lt;/p&gt;
+&lt;p&gt;通常是用来表达角色情绪、物体速度感或突出画面重点，动漫中还会做出动画以增加表现力。但是如果不靠画（全凭程序化）怎么做呢？&lt;/p&gt;
+&lt;p&gt;如果不限制工具的话思路很简单，在 PS 里先画一个渐变，再用波浪扭成间隔不等的尖刺状，最后转成极坐标就完事了。&lt;/p&gt;
+&lt;p&gt;但是如果要用 shader 写的话就有点头疼了，主要是那种不规则的尖刺效果。我一开始想的是让 V 的起点在径向随机偏移，但 UV 毕竟是重复平铺的，极坐标一扭还是会窜到中心去，甚至 V 有没有都没关系。&lt;/p&gt;
+&lt;p&gt;所以偏移 UV 的想法是不行了，我的做法是糊出一个遮罩（也是很邪门了）。&lt;/p&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;-0x02-radiating-lines-放射线效果&#34;&gt;🕸️ 0x02 Radiating Lines 放射线效果&lt;/h2&gt;
+&lt;p&gt;要做出放射的效果，首先得让 UV 位于模型的中心，以正方形平面为例，在映射中将 UV 同时减去 0.5，让 UV (0,0) 处位于模型中心。&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; src=&#34;https://raw.gitmirror.com/congyuxiaoyoudao/Picgo-ImageBed/main/TA-interludes/Interlude%202.MangaSpeedLines/202503312115356.png#center&#34;&gt;&lt;/p&gt;
+&lt;p&gt;然后就是让 U 绕圆周环游一圈，现在的 UV 可以当成直角坐标系处理，很容易给出一个单位圆的方程：&lt;/p&gt;
+&lt;div&gt;$$
+u^2+v^2=1
+$$&lt;/div&gt;
+&lt;p&gt;然后算以 U 轴正方向为起点的角度：&lt;/p&gt;
+&lt;div&gt;$$
+\theta=\arctan \frac{v}{u}
+$$&lt;/div&gt;
+&lt;p&gt;可以用运算节点的反正切 2 计算这个$\theta$，但是结果的范围是$-\pi \sim+\pi$，需要映射回$0 \sim1$：&lt;/p&gt;</description>
+    </item>
+    <item>
       <title>Assignment 2. A Review of Realistic Water Waveform Simulation</title>
       <link>https://congyuxiaoyoudao.github.io/posts/assignments/a-review-of-realistic-water-waveform-simulation/</link>
       <pubDate>Fri, 28 Mar 2025 00:00:00 +0000</pubDate>
