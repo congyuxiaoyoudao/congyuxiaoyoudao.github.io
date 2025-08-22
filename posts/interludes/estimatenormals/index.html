@@ -1,0 +1,249 @@
+<!doctype html><html lang=zh dir=auto><head><meta charset=utf-8><meta http-equiv=X-UA-Compatible content="IE=edge"><meta name=viewport content="width=device-width,initial-scale=1,shrink-to-fit=no"><meta name=robots content="index, follow"><title>Interlude 4. 在点云数据中估计法线 | The Only Problem's Blog</title><meta name=keywords content="点云,法线"><meta name=description content="
+3DGS 的原论文中，每个高斯是不存法线信息的，然而后续工作中，也有研究人员将法线和 BRDF 信息进行训练，这样一来，就可以在后续的光栅化过程中输出 GBuffer，完成 relighting 的任务。生成初始法线，可以仅考虑高斯的均值，基于局部平面假设进行估计。
+
+0x00 To begin with
+这篇文章将会包含以下内容：
+
+ 什么是 PLY
+ 利用最小二乘法估计点云法线
+ 使用 PCL 的实现
+ 在 CloudCompare 中实现
+
+For reference👇：
+
+📖 
+
+
+
+
+
+
+
+  
+  PLY - Polygon File Format
+
+
+📖 
+
+
+
+
+
+
+
+  
+  Estimating Surface Normals in a PointCloud
+
+
+📺 
+
+
+
+
+
+
+
+  
+  Normal and Curvature Calculation for a Pointcloud
+
+
+📃 
+
+
+
+
+
+
+
+  
+  http://mediatum.ub.tum.de/doc/800632/941254.pdf
+
+
+
+
+0x01 PLY 格式
+PLY（Polygon File Format, also known as the Stanford Triangle Format），是一种用于存储多边形集合的图形对象的格式。有两种子格式：
+
+ASCII：ASCII 编码表示，直观易读
+Binary：二进制格式，存储空间小，能够快速保存和加载
+
+PLY 文件的经典结构如下：
+Header  // description field, containing element type, property and count
+Vertex List  // list of data for each vertex
+Face List  // list of data for each face
+(List of other elements)
+Header 描述文件格式，评论（comment）以及每个元素的描述，并在其后指定该元素属性。例如一个以 ASCII 子格式保存的 PLY 文件，其 Header 如下："><meta name=author content="The Only Problem"><link rel=canonical href=https://congyuxiaoyoudao.github.io/posts/interludes/estimatenormals/><link crossorigin=anonymous href=/assets/css/stylesheet.452758010f0b7fc9ad7fa528ffdfdd8eb9e830816fb8c8119f16f39583297db8.css integrity="sha256-RSdYAQ8Lf8mtf6Uo/9/djrnoMIFvuMgRnxbzlYMpfbg=" rel="preload stylesheet" as=style><link rel=icon href=https://congyuxiaoyoudao.github.io/favicon.ico><link rel=icon type=image/png sizes=16x16 href=https://congyuxiaoyoudao.github.io/favicon-16x16.png><link rel=icon type=image/png sizes=32x32 href=https://congyuxiaoyoudao.github.io/favicon-32x32.png><link rel=apple-touch-icon href=https://congyuxiaoyoudao.github.io/apple-touch-icon.png><link rel=mask-icon href=https://congyuxiaoyoudao.github.io/safari-pinned-tab.svg><meta name=theme-color content="#2e2e33"><meta name=msapplication-TileColor content="#2e2e33"><link rel=alternate hreflang=zh href=https://congyuxiaoyoudao.github.io/posts/interludes/estimatenormals/><noscript><style>#theme-toggle,.top-link{display:none}</style><style>@media(prefers-color-scheme:dark){:root{--theme:rgb(29, 30, 32);--entry:rgb(46, 46, 51);--primary:rgb(218, 218, 219);--secondary:rgb(155, 156, 157);--tertiary:rgb(65, 66, 68);--content:rgb(196, 196, 197);--code-block-bg:rgb(46, 46, 51);--code-bg:rgb(55, 56, 62);--border:rgb(51, 51, 51)}.list{background:var(--theme)}.list:not(.dark)::-webkit-scrollbar-track{background:0 0}.list:not(.dark)::-webkit-scrollbar-thumb{border-color:var(--theme)}}</style></noscript><link rel=stylesheet href=https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/katex.min.css integrity=sha384-wcIxkf4k558AjM3Yz3BBFQUbk/zgIYC2R0QpeeYb+TwlBVMrlgLqwRjRtGZiK7ww crossorigin=anonymous><script defer src=https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/katex.min.js integrity=sha384-hIoBPJpTUs74ddyc4bFZSM1TVlQDA60VBbJS0oA934VSz82sBx1X7kSx2ATBDIyd crossorigin=anonymous></script><script defer src=https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/contrib/auto-render.min.js integrity=sha384-43gviWU0YVjaDtb/GhzOouOXtZMP/7XUzwPTstBeZFe/+rCMvRwr4yROQP43s0Xk crossorigin=anonymous onload='window.addEventListener("DOMContentLoaded",function(){renderMathInElement(document.body,{delimiters:[{left:"$$",right:"$$",display:!0},{left:"$",right:"$",display:!1},{left:"\\$$",right:"\\\\$$",display:!1},{left:"\\$$",right:"\\\\$$",display:!0}]})})'></script><link rel=preconnect href=https://fonts.googleapis.com><link rel=preconnect href=https://fonts.gstatic.com crossorigin><link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap" rel=stylesheet><link rel=stylesheet href=https://cdn.bootcdn.net/ajax/libs/lxgw-wenkai-screen-webfont/1.7.0/style.min.css><meta property="og:url" content="https://congyuxiaoyoudao.github.io/posts/interludes/estimatenormals/"><meta property="og:site_name" content="The Only Problem's Blog"><meta property="og:title" content="Interlude 4. 在点云数据中估计法线"><meta property="og:description" content=" 3DGS 的原论文中，每个高斯是不存法线信息的，然而后续工作中，也有研究人员将法线和 BRDF 信息进行训练，这样一来，就可以在后续的光栅化过程中输出 GBuffer，完成 relighting 的任务。生成初始法线，可以仅考虑高斯的均值，基于局部平面假设进行估计。
+0x00 To begin with 这篇文章将会包含以下内容：
+什么是 PLY 利用最小二乘法估计点云法线 使用 PCL 的实现 在 CloudCompare 中实现 For reference👇：
+📖 PLY - Polygon File Format 📖 Estimating Surface Normals in a PointCloud 📺 Normal and Curvature Calculation for a Pointcloud 📃 http://mediatum.ub.tum.de/doc/800632/941254.pdf 0x01 PLY 格式 PLY（Polygon File Format, also known as the Stanford Triangle Format），是一种用于存储多边形集合的图形对象的格式。有两种子格式：
+ASCII：ASCII 编码表示，直观易读 Binary：二进制格式，存储空间小，能够快速保存和加载 PLY 文件的经典结构如下：
+Header // description field, containing element type, property and count Vertex List // list of data for each vertex Face List // list of data for each face (List of other elements) Header 描述文件格式，评论（comment）以及每个元素的描述，并在其后指定该元素属性。例如一个以 ASCII 子格式保存的 PLY 文件，其 Header 如下："><meta property="og:locale" content="zh"><meta property="og:type" content="article"><meta property="article:section" content="posts"><meta property="article:published_time" content="2025-07-02T00:00:00+00:00"><meta property="article:modified_time" content="2025-07-02T00:00:00+00:00"><meta property="article:tag" content="点云"><meta property="article:tag" content="法线"><meta name=twitter:card content="summary"><meta name=twitter:title content="Interlude 4. 在点云数据中估计法线"><meta name=twitter:description content="
+3DGS 的原论文中，每个高斯是不存法线信息的，然而后续工作中，也有研究人员将法线和 BRDF 信息进行训练，这样一来，就可以在后续的光栅化过程中输出 GBuffer，完成 relighting 的任务。生成初始法线，可以仅考虑高斯的均值，基于局部平面假设进行估计。
+
+0x00 To begin with
+这篇文章将会包含以下内容：
+
+ 什么是 PLY
+ 利用最小二乘法估计点云法线
+ 使用 PCL 的实现
+ 在 CloudCompare 中实现
+
+For reference👇：
+
+📖 
+
+
+
+
+
+
+
+  
+  PLY - Polygon File Format
+
+
+📖 
+
+
+
+
+
+
+
+  
+  Estimating Surface Normals in a PointCloud
+
+
+📺 
+
+
+
+
+
+
+
+  
+  Normal and Curvature Calculation for a Pointcloud
+
+
+📃 
+
+
+
+
+
+
+
+  
+  http://mediatum.ub.tum.de/doc/800632/941254.pdf
+
+
+
+
+0x01 PLY 格式
+PLY（Polygon File Format, also known as the Stanford Triangle Format），是一种用于存储多边形集合的图形对象的格式。有两种子格式：
+
+ASCII：ASCII 编码表示，直观易读
+Binary：二进制格式，存储空间小，能够快速保存和加载
+
+PLY 文件的经典结构如下：
+Header  // description field, containing element type, property and count
+Vertex List  // list of data for each vertex
+Face List  // list of data for each face
+(List of other elements)
+Header 描述文件格式，评论（comment）以及每个元素的描述，并在其后指定该元素属性。例如一个以 ASCII 子格式保存的 PLY 文件，其 Header 如下："><script type=application/ld+json>{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Posts","item":"https://congyuxiaoyoudao.github.io/posts/"},{"@type":"ListItem","position":2,"name":"Interludes","item":"https://congyuxiaoyoudao.github.io/posts/interludes/"},{"@type":"ListItem","position":3,"name":"Interlude 4. 在点云数据中估计法线","item":"https://congyuxiaoyoudao.github.io/posts/interludes/estimatenormals/"}]}</script><script type=application/ld+json>{"@context":"https://schema.org","@type":"BlogPosting","headline":"Interlude 4. 在点云数据中估计法线","name":"Interlude 4. 在点云数据中估计法线","description":" 3DGS 的原论文中，每个高斯是不存法线信息的，然而后续工作中，也有研究人员将法线和 BRDF 信息进行训练，这样一来，就可以在后续的光栅化过程中输出 GBuffer，完成 relighting 的任务。生成初始法线，可以仅考虑高斯的均值，基于局部平面假设进行估计。\n0x00 To begin with 这篇文章将会包含以下内容：\n什么是 PLY 利用最小二乘法估计点云法线 使用 PCL 的实现 在 CloudCompare 中实现 For reference👇：\n📖 PLY - Polygon File Format 📖 Estimating Surface Normals in a PointCloud 📺 Normal and Curvature Calculation for a Pointcloud 📃 http://mediatum.ub.tum.de/doc/800632/941254.pdf 0x01 PLY 格式 PLY（Polygon File Format, also known as the Stanford Triangle Format），是一种用于存储多边形集合的图形对象的格式。有两种子格式：\nASCII：ASCII 编码表示，直观易读 Binary：二进制格式，存储空间小，能够快速保存和加载 PLY 文件的经典结构如下：\nHeader // description field, containing element type, property and count Vertex List // list of data for each vertex Face List // list of data for each face (List of other elements) Header 描述文件格式，评论（comment）以及每个元素的描述，并在其后指定该元素属性。例如一个以 ASCII 子格式保存的 PLY 文件，其 Header 如下：\n","keywords":["点云","法线"],"articleBody":" 3DGS 的原论文中，每个高斯是不存法线信息的，然而后续工作中，也有研究人员将法线和 BRDF 信息进行训练，这样一来，就可以在后续的光栅化过程中输出 GBuffer，完成 relighting 的任务。生成初始法线，可以仅考虑高斯的均值，基于局部平面假设进行估计。\n0x00 To begin with 这篇文章将会包含以下内容：\n什么是 PLY 利用最小二乘法估计点云法线 使用 PCL 的实现 在 CloudCompare 中实现 For reference👇：\n📖 PLY - Polygon File Format 📖 Estimating Surface Normals in a PointCloud 📺 Normal and Curvature Calculation for a Pointcloud 📃 http://mediatum.ub.tum.de/doc/800632/941254.pdf 0x01 PLY 格式 PLY（Polygon File Format, also known as the Stanford Triangle Format），是一种用于存储多边形集合的图形对象的格式。有两种子格式：\nASCII：ASCII 编码表示，直观易读 Binary：二进制格式，存储空间小，能够快速保存和加载 PLY 文件的经典结构如下：\nHeader // description field, containing element type, property and count Vertex List // list of data for each vertex Face List // list of data for each face (List of other elements) Header 描述文件格式，评论（comment）以及每个元素的描述，并在其后指定该元素属性。例如一个以 ASCII 子格式保存的 PLY 文件，其 Header 如下：\n这里的数据不正常是因为中途改了原本二进制格式的编码，似乎导致了解析错误，后文所用的文件是正常的\n在该 PLY 文件中，存储了 24077 个顶点的信息，每个顶点由三个浮点分量 x，y，z 描述位置。在 Header 结束（end_header）后，即列出 Vertex List 的内容。\n此外，PLY 格式允许用户自定义元素内容，例如 3DGS 就专门设计了一个 PLY 格式。\n可以在一些 DCC 软件原生地（如 Blender）或借助插件导入 PLY 文件，也可以使用专业分析点云的软件（如 CloudCompare）。\n0x02 从点云估计法线 在传统的图形学中，每个顶点的法向由与该顶点邻接的面法向按某种形式加权计算得出，因此需要存储 Mesh 的文件至少提供每个顶点的位置数据以及组成各面的顶点索引数据。\n对于点云数据，由于其只是在原始表面上离散采样的一系列点，不存在表面信息，因此无法直接通过由面到点的方式求解顶点法线。然而，可以考虑如下两种思路：\n利用表面网格化技术从点云中构建表面，然后从网格中计算顶点法线 使用近似方法直接从点云中估计法线 第一种方法通过某种表面网格化技术（例如 Marching Cubes）从点云转换的 SDF 中重建表面，然后再使用传统图形学的做法计算顶点法线；第二种方法直接从点云中估计法线，其基于一个 local planar assumption：在足够小的一个局部区域内，点云的原始表面可以被一个平面（或者其它结构）近似。因此，确定表面上某一点的法线的问题就转化为估计与表面相切的平面的法线的问题。\n本篇文章中，将实现第二种方法。\n0x03 最小二乘法估计法线 在高中物理，经常使用最小二乘法用一条直线拟合实验数据，实际上，最小二乘法的思想可以扩展至更高维度，以拟合超平面或更复杂的几何结构\n要拟合一个平面，本质上是一个三元线性回归问题，相应地可以转化为最小二乘法的平面估计问题（least-square plane fitting estimation）。\n基本思路 对于给定点云的局部集合 $\\mathcal{P}^k$（$k$ 为集合中点的个数），其潜在近似描述的平面可以表示为点 $x$ 和面法向 $\\vec{n}$，对于集合中任意点 $p_{i}\\in\\mathcal{P}^k$，其到平面的距离为 $d_{i}=(p_{i}-x)\\cdot \\vec{n}$。最小二乘法的目标是求解 $x,n$，以使所有点到这个平面的距离平方和最小。令 $x$ 为集合点的质心：\n$$ x=\\frac{1}{k}\\cdot \\sum_{i=1}^kp_{i} $$ 求解 $\\vec{n}$ 的过程可以通过分析 $\\mathcal{P}^k$ 的协方差矩阵 $C\\in \\mathbb{R}^{3\\times 3}$：\n$$ C=\\frac{1}{k}\\sum_{i=1}^{k}(p_{i}-\\bar{p})(p_{i}-\\bar{p})^T,~C\\cdot \\vec{v_{j}}=\\lambda_{j}\\cdot \\vec{v_{j}},~j\\in\\{0,1,2\\} $$ 其中，$\\bar{p}=\\frac{1}{k}\\sum_{j=1}^{k}p_{ij}$ ，$\\lambda_{j}\\in \\mathbb{R}$ 为其特征值。定义去中心化的点坐标 $p_{i}’=p_{i}-\\bar{p}=(x_{i}’,y_{i}’,z_{i}’)$，将 $C$ 展开：\n$$ C = \\frac{1}{k} \\sum_{i=1}^{k} \\begin{bmatrix} x_i'^2 \u0026 x_i' y_i' \u0026 x_i' z_i' \\\\ x_i' y_i' \u0026 y_i'^2 \u0026 y_i' z_i' \\\\ x_i' z_i' \u0026 y_i' z_i' \u0026 z_i'^2 \\end{bmatrix} =\\begin{bmatrix} \\sigma_{xx} \u0026 \\sigma_{xy} \u0026 \\sigma_{xz} \\\\ \\sigma_{yx} \u0026 \\sigma_{yy} \u0026 \\sigma_{yz} \\\\ \\sigma_{zx} \u0026 \\sigma_{zy} \u0026 \\sigma_{zz} \\\\ \\end{bmatrix} $$ 可以观察到 $C$ 是一个实对称半正定矩阵，主对角线元素代表集合 $\\mathcal{P}^k$ 在 $x,y,z$ 方向上的方差，非对角元素表示不同坐标轴之间的协方差。根据谱定理，实对称矩阵 $C$ 可被分解为：\n$$ C=Q\\Lambda Q^{T}=Q\\Lambda Q^{-1},~Q=[\\vec{v_{0}},\\vec{v_{1}},\\vec{v_{2}}],~\\Lambda=\\mathrm{diag}(\\lambda_{0}, \\lambda_{1}, \\lambda_{2}) $$ 实对称矩阵，其逆等于其转置\n可以将其视为某个二次型的矩阵，定义二次型函数 $Q(x)$：\n$$ Q(x)=x^{T}C^{-1}x $$ 对 $C$ 做特征分解：\n$$ Q(x)=x^{T}C^{-1}x=(x^T Q)\\Lambda^{-1} (Q^T x) $$ 记 $y=Q^T x$，$y$ 为切线空间下的坐标，原二次型转换为：\n假定特征向量均已经过归一化\n$$ Q(x)=y^{T}\\Lambda^{-1}y=\\sum_{j=1}^{n} \\frac{y_{j}^2}{\\lambda_{j}}=\\frac{y_{0}^{2}}{\\lambda_{0}}+\\frac{y_{1}^{2}}{\\lambda_{1}}+\\frac{y_{2}^{2}}{\\lambda_{2}}=1 $$ 其中，$y_{j}$ 为 $x$ 在协方差矩阵第 $j$ 个特征向量方向的投影。所以在几何角度上，可以把协方差矩阵 $C$ 视为定义了一个拟合点集的椭球体。\n$C$ 的特征向量 $\\vec{v_{j}}$ 构成一个三维正交基（切线空间基），代表集合 $\\mathcal{P}^k$ 的三个主成分（Principle Components）。如果 $C$ 表示的椭球接近一个平面，则集合 $\\mathcal{P}^k$ 在垂直于平面的方向上变化最小，即该方向的方差最小、特征值最小。考虑 $0\\leq \\lambda_{0}\\leq \\lambda_{1}\\leq \\lambda_{2}$，最小的特征值 $\\lambda_{0}$ 对应的特征向量 $\\vec{v_{0}}$ 即为拟合平面的法线。\nK-Neighborhood Selection 如上文所述，计算点云中某点的法线需要选取与该点距离最近的 $k$ 个点（K-Neighborhood）进行估计。因此，$k$ 值的选取对于估计法线的质量有着极大影响：\n较大的 $k$ 尺度会导致邻域点集较大，从而引入额外噪声，导致估计的点法向失真 较小的 $k$ 尺度可以捕捉局部细节，但容易受局部非均匀采样的影响，导致大范围内法线方向不稳定，并且增大开销 个人感觉是采样频率的问题，高频相对低频能够更好地捕捉细节，但也更容易受到噪声的干扰\n一般地，$k$ 值的选取可以让用户凭经验选择阈值，然而固定的阈值无法应对一些复杂（频率、空间分布不均匀）的点云，一种更好地方式是自适应地选取 $k$ 值。根据当前估计点的场景及其所需细节程度选取阈值，例如，在一些高频区域（潜在表面的转角、连接处）使用较小的 $k$，而在其它情况下可以使用较大的 $k$。判断给定点的所需细节程度可以通过分析其密度、曲率等因素。\n翻转法线 PCA 方法估计的法线方向如下图左、中所示，在同一个平面上出现了向内和向外两种方向的法线；下图右则为扩展高斯图像（Extended Gaussian Image），描述了点云所有法线方向，由于数据集是 2.5D 的（即从单一视点下采集），因此法线只应分布在一个半球范围内，而实际上它们分布在整个球上。\n为了使所有法线都以各自不同的程度朝向视点 $v_{p}$，对于点 $p_{i}$ 及其法线 $\\vec{n_{i}}$，应满足：\n$$ \\vec{n_{i}}\\cdot(v_{p}-p_{i})\u003e0 $$ 对于不符合上式的法线，将其取反，即可得到正确朝向（朝向视点）的法线。下图给出了经该方法重定向后的点云法线：\n该方法仅在已知视点 $v_{p}$，且一个视图仅在该视点下采集时成立。当不知道视图的视点或者视图存在多个采集视点，则上述方法不成立。\n综上所述，对于每个点 $p_{i}$，估计其法线的步骤如下：\n获得与其距离最近的 $k$ 个邻居 计算 $p_{i}$ 的法线 检查计算出的法线是否朝向视点，否则翻转 0x03 利用 PCL 实现 PCL（Point Cloud Library）是一个开源的点云处理库，专门用于处理三维点云数据。PCL 集成了包括点云文件的读写、特征提取、分割配准、可视化等模块，可以方便地处理、分析点云数据。此次从点云估计法线的任务可以借助 PCL 完成，我的配置信息为：\n平台：Windows 11 PCL 版本：PCL 1.15.0 IDE：VisualStudio 2022 PCL 可在 Github 官方仓库下载：\nReleases · PointCloudLibrary/pcl 配置过程可参考：\nPCL点云库安装及学习（2021.7.28） Trouble Shooting 配置过程中遇到了一些问题，这里一并提一下：\nerror: PCL requires C++14 or above error: Potential runtime error due to aligned malloc mismatch! You likely have to compile your code with AVX enabled or define EIGEN_MAX_ALIGN_BYTES=32 [pcl::PCDReader::read] Could not find file (乱码) Assertion failed: index \u003e 0 \u0026\u0026 index \u003c count, file C:\\Program Files\\flann\\include\\flann/algorithms/kdtree_single_index.h, line 492 第一个问题默认的 C++ 版本太低，在项目–\u003e属性–\u003eC/C++–\u003e语言–\u003eC++语言标准中选择更高版本（17 或 20）即可。\n第二个问题，内存对齐问题，可以通过改变指令集解决，在项目–\u003e属性–\u003eC/C++–\u003e代码生成–\u003e启用增强指令集中选择高级矢量扩展 (X86/X64) (/arch:AVX) 即可。\n第三个问题，下载的 PCL 在根目录以及第三方依赖的 lib 目录下会提供 Debug 和 Release 两种版本的库，其中 PCL 的 lib 文件中 Debug 版本的库在文件名末尾会以‘d’标识，而第三方依赖的库则会以‘-gd-’标识。链接器链接动态库时把 Debug 和 Release 版本的混淆了，所以在项目–\u003e属性–\u003e链接器–\u003e输入–\u003e附加依赖项中只填入对应版本的库即可。\n第四个问题，表面上是断言 k-d tree 建树错误，然而检查了一下原始数据，发现是文件错了，数据包含了 e+23 和 e-20 这种极端值。重新下载原始文件就正常了，推测是中途改了一遍编码格式导致的。\nCode 1#include 2#include 3#include 4#include 5#include 6 7int main() { 8 // read ply file 9 pcl::PointCloud\u003cpcl::PointXYZ\u003e::Ptr cloud(new pcl::PointCloud\u003cpcl::PointXYZ\u003e); 10 if (pcl::io::loadPLYFile\u003cpcl::PointXYZ\u003e(\"Test.ply\", *cloud) != 0) { 11 PCL_ERROR(\"Failed to load point cloud file!\"); 12 return -1; 13 } 14 //[DEBUG]: check data 15 //std::cout \u003c\u003c \"Loaded cloud size: \" \u003c\u003c cloud-\u003esize() \u003c\u003c std::endl; 16 //for (size_t i = 0; i \u003c std::min(10, cloud-\u003esize()); ++i) { 17 // auto\u0026 pt = cloud-\u003epoints[i]; 18 // std::cout \u003c\u003c i \u003c\u003c \": (\" \u003c\u003c pt.x \u003c\u003c \", \" \u003c\u003c pt.y \u003c\u003c \", \" \u003c\u003c pt.z \u003c\u003c \")\\n\"; 19 //} 20 21 // filter invalid points 22 pcl::PointCloud\u003cpcl::PointXYZ\u003e::Ptr cloud_filtered(new pcl::PointCloud\u003cpcl::PointXYZ\u003e); 23 std::vector\u003cint\u003e nan_indices; 24 pcl::removeNaNFromPointCloud(*cloud, *cloud_filtered, nan_indices); 25 if (cloud-\u003eempty()) { 26 PCL_ERROR(\"Error: Point cloud is empty after removing NaNs!\"); 27 return -1; 28 } 29 30 // estimate normal 31 pcl::NormalEstimation\u003cpcl::PointXYZ, pcl::Normal\u003e ne; 32 ne.setInputCloud(cloud_filtered); 33 ne.setViewPoint(100.0, 0.0, 0.0); 34 pcl::search::KdTree\u003cpcl::PointXYZ\u003e::Ptr tree(new pcl::search::KdTree\u003cpcl::PointXYZ\u003e()); 35 ne.setSearchMethod(tree); 36 ne.setKSearch(100); 37 38 pcl::PointCloud\u003cpcl::Normal\u003e::Ptr normals(new pcl::PointCloud\u003cpcl::Normal\u003e); 39 ne.compute(*normals); 40 41 // vis 42 pcl::visualization::PCLVisualizer viewer(\"Normals\"); 43 viewer.addPointCloud(cloud_filtered, \"cloud\"); 44 viewer.setPointCloudRenderingProperties( 45 pcl::visualization::PCL_VISUALIZER_COLOR, 46 0, 1, 0, 47 \"cloud\" 48 ); 49 viewer.addPointCloudNormals\u003cpcl::PointXYZ, pcl::Normal\u003e(cloud_filtered, normals, 10, 0.05, \"normals\"); 50 51 while (!viewer.wasStopped()) { 52 viewer.spinOnce(); 53 } 54} 运行程序，不出意外就能看到法线：\n可以观察到由于选取的点云为平面，较大的 $k$ 值得到的法线在整个平面上朝向更加均匀，且在转角处有更为平滑的过渡。\n0x04 在 CloudCompare 中实现 然后按照指示选择合适的 Local surface model、Neighbors、Orientation，即可计算法线，最后选中点云，在 Properties 栏中对法线进行可视化：\n","wordCount":"686","inLanguage":"zh","datePublished":"2025-07-02T00:00:00Z","dateModified":"2025-07-02T00:00:00Z","author":{"@type":"Person","name":"The Only Problem"},"mainEntityOfPage":{"@type":"WebPage","@id":"https://congyuxiaoyoudao.github.io/posts/interludes/estimatenormals/"},"publisher":{"@type":"Organization","name":"The Only Problem's Blog","logo":{"@type":"ImageObject","url":"https://congyuxiaoyoudao.github.io/favicon.ico"}}}</script></head><body id=top><script>localStorage.getItem("pref-theme")==="dark"?document.body.classList.add("dark"):localStorage.getItem("pref-theme")==="light"?document.body.classList.remove("dark"):window.matchMedia("(prefers-color-scheme: dark)").matches&&document.body.classList.add("dark")</script><header class=header><nav class=nav><div class=logo><a href=https://congyuxiaoyoudao.github.io/ accesskey=h title="The Only Problem's Blog (Alt + H)">The Only Problem's Blog</a><div class=logo-switches><button id=theme-toggle accesskey=t title="(Alt + T)" aria-label="Toggle theme">
+<svg id="moon" width="24" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+<svg id="sun" width="24" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg></button></div></div><ul id=menu><li><a href=https://congyuxiaoyoudao.github.io/archives/ title=Archive><span>Archive</span></a></li><li><a href=https://congyuxiaoyoudao.github.io/search/ title="Search (Alt + /)" accesskey=/><span>Search</span></a></li><li><a href=https://congyuxiaoyoudao.github.io/tags/ title=Tags><span>Tags</span></a></li><li><a href=https://congyuxiaoyoudao.github.io/about/ title=About><span>About</span></a></li></ul></nav></header><main class=main><article class=post-single><header class=post-header><div class=breadcrumbs><a href=https://congyuxiaoyoudao.github.io/>主页</a>&nbsp;»&nbsp;<a href=https://congyuxiaoyoudao.github.io/posts/>Posts</a>&nbsp;»&nbsp;<a href=https://congyuxiaoyoudao.github.io/posts/interludes/>Interludes</a></div><h1 class="post-title entry-hint-parent">Interlude 4. 在点云数据中估计法线</h1><div class=post-meta><span title='2025-07-02 00:00:00 +0000 UTC'>七月 2, 2025</span>&nbsp;·&nbsp;4 分钟&nbsp;·&nbsp;The Only Problem</div></header><div class=toc><details><summary accesskey=c title="(Alt + C)"><span class=details>目录</span></summary><div class=inner><ul><li><a href=#0x00-to-begin-with aria-label="0x00 To begin with">0x00 To begin with</a></li><li><a href=#0x01-ply-%e6%a0%bc%e5%bc%8f aria-label="0x01 PLY 格式">0x01 PLY 格式</a></li><li><a href=#0x02-%e4%bb%8e%e7%82%b9%e4%ba%91%e4%bc%b0%e8%ae%a1%e6%b3%95%e7%ba%bf aria-label="0x02 从点云估计法线">0x02 从点云估计法线</a></li><li><a href=#0x03-%e6%9c%80%e5%b0%8f%e4%ba%8c%e4%b9%98%e6%b3%95%e4%bc%b0%e8%ae%a1%e6%b3%95%e7%ba%bf aria-label="0x03 最小二乘法估计法线">0x03 最小二乘法估计法线</a><ul><li><a href=#%e5%9f%ba%e6%9c%ac%e6%80%9d%e8%b7%af aria-label=基本思路>基本思路</a></li><li><a href=#k-neighborhood-selection aria-label="K-Neighborhood Selection">K-Neighborhood Selection</a></li><li><a href=#%e7%bf%bb%e8%bd%ac%e6%b3%95%e7%ba%bf aria-label=翻转法线>翻转法线</a></li></ul></li><li><a href=#0x03-%e5%88%a9%e7%94%a8-pcl-%e5%ae%9e%e7%8e%b0 aria-label="0x03 利用 PCL 实现">0x03 利用 PCL 实现</a><ul><li><a href=#trouble-shooting aria-label="Trouble Shooting">Trouble Shooting</a></li><li><a href=#code aria-label=Code>Code</a></li></ul></li><li><a href=#0x04-%e5%9c%a8-cloudcompare-%e4%b8%ad%e5%ae%9e%e7%8e%b0 aria-label="0x04 在 CloudCompare 中实现">0x04 在 CloudCompare 中实现</a></li></ul></div></details></div><div class=post-content><blockquote><p>3DGS 的原论文中，每个高斯是不存法线信息的，然而后续工作中，也有研究人员将法线和 BRDF 信息进行训练，这样一来，就可以在后续的光栅化过程中输出 GBuffer，完成 relighting 的任务。生成初始法线，可以仅考虑高斯的均值，基于局部平面假设进行估计。</p></blockquote><hr><h2 id=0x00-to-begin-with>0x00 To begin with<a hidden class=anchor aria-hidden=true href=#0x00-to-begin-with>#</a></h2><p>这篇文章将会包含以下内容：</p><ul><li><input checked disabled type=checkbox> 什么是 PLY</li><li><input checked disabled type=checkbox> 利用最小二乘法估计点云法线</li><li><input checked disabled type=checkbox> 使用 PCL 的实现</li><li><input checked disabled type=checkbox> 在 CloudCompare 中实现</li></ul><p><strong>For reference</strong>👇：</p><ul><li>📖
+<a href=https://paulbourke.net/dataformats/ply/>PLY - Polygon File Format</a></li><li>📖
+<a href=https://pointclouds.org/documentation/tutorials/normal_estimation.html>Estimating Surface Normals in a PointCloud</a></li><li>📺
+<a href="https://www.youtube.com/watch?v=lco0yFWm1QQ">Normal and Curvature Calculation for a Pointcloud</a></li><li>📃
+<a href=http://mediatum.ub.tum.de/doc/800632/941254.pdf>http://mediatum.ub.tum.de/doc/800632/941254.pdf</a></li></ul><hr><h2 id=0x01-ply-格式>0x01 PLY 格式<a hidden class=anchor aria-hidden=true href=#0x01-ply-格式>#</a></h2><p>PLY（Polygon File Format, also known as the Stanford Triangle Format），是一种用于存储多边形集合的图形对象的格式。有两种子格式：</p><ul><li>ASCII：ASCII 编码表示，直观易读</li><li>Binary：二进制格式，存储空间小，能够快速保存和加载</li></ul><p>PLY 文件的经典结构如下：</p><pre tabindex=0><code>Header  // description field, containing element type, property and count
+Vertex List  // list of data for each vertex
+Face List  // list of data for each face
+(List of other elements)
+</code></pre><p>Header 描述文件格式，评论（comment）以及每个元素的描述，并在其后指定该元素属性。例如一个以 ASCII 子格式保存的 PLY 文件，其 Header 如下：</p><p><img loading=lazy src=https://raw.gitmirror.com/congyuxiaoyoudao/Picgo-ImageBed/main/TA-interludes/Interlude%204.EstimateNormalFromPointCloud/202507021948603.png#center></p><blockquote><p>这里的数据不正常是因为中途改了原本二进制格式的编码，似乎导致了解析错误，后文所用的文件是正常的</p></blockquote><p>在该 PLY 文件中，存储了 24077 个顶点的信息，每个顶点由三个浮点分量 x，y，z 描述位置。在 Header 结束（end_header）后，即列出 Vertex List 的内容。</p><p>此外，PLY 格式允许用户自定义元素内容，例如 3DGS 就专门设计了一个 PLY 格式。</p><p>可以在一些 DCC 软件原生地（如 Blender）或借助插件导入 PLY 文件，也可以使用专业分析点云的软件（如 CloudCompare）。</p><hr><h2 id=0x02-从点云估计法线>0x02 从点云估计法线<a hidden class=anchor aria-hidden=true href=#0x02-从点云估计法线>#</a></h2><p>在传统的图形学中，每个顶点的法向由与该顶点邻接的面法向按某种形式加权计算得出，因此需要存储 Mesh 的文件至少提供每个顶点的位置数据以及组成各面的顶点索引数据。</p><p>对于点云数据，由于其只是在原始表面上离散采样的一系列点，不存在表面信息，因此无法直接通过由面到点的方式求解顶点法线。然而，可以考虑如下两种思路：</p><ul><li>利用表面网格化技术从点云中构建表面，然后从网格中计算顶点法线</li><li>使用近似方法直接从点云中估计法线</li></ul><p>第一种方法通过某种表面网格化技术（例如 Marching Cubes）从点云转换的 SDF 中重建表面，然后再使用传统图形学的做法计算顶点法线；第二种方法直接从点云中估计法线，其基于一个 local planar assumption：在足够小的一个局部区域内，点云的原始表面可以被一个平面（或者其它结构）近似。因此，确定表面上某一点的法线的问题就转化为估计与表面相切的平面的法线的问题。</p><p>本篇文章中，将实现第二种方法。</p><hr><h2 id=0x03-最小二乘法估计法线>0x03 最小二乘法估计法线<a hidden class=anchor aria-hidden=true href=#0x03-最小二乘法估计法线>#</a></h2><blockquote><p>在高中物理，经常使用最小二乘法用一条直线拟合实验数据，实际上，最小二乘法的思想可以扩展至更高维度，以拟合超平面或更复杂的几何结构</p></blockquote><p>要拟合一个平面，本质上是一个三元线性回归问题，相应地可以转化为最小二乘法的平面估计问题（least-square plane fitting estimation）。</p><h3 id=基本思路>基本思路<a hidden class=anchor aria-hidden=true href=#基本思路>#</a></h3><p>对于给定点云的局部集合 $\mathcal{P}^k$（$k$ 为集合中点的个数），其潜在近似描述的平面可以表示为点 $x$ 和面法向 $\vec{n}$，对于集合中任意点 $p_{i}\in\mathcal{P}^k$，其到平面的距离为 $d_{i}=(p_{i}-x)\cdot \vec{n}$。最小二乘法的目标是求解 $x,n$，以使所有点到这个平面的距离平方和最小。令 $x$ 为集合点的质心：</p><div>$$
+x=\frac{1}{k}\cdot \sum_{i=1}^kp_{i}
+$$</div><p>求解 $\vec{n}$ 的过程可以通过分析 $\mathcal{P}^k$ 的协方差矩阵 $C\in \mathbb{R}^{3\times 3}$：</p><div>$$
+C=\frac{1}{k}\sum_{i=1}^{k}(p_{i}-\bar{p})(p_{i}-\bar{p})^T,~C\cdot \vec{v_{j}}=\lambda_{j}\cdot \vec{v_{j}},~j\in\{0,1,2\}
+$$</div><p>其中，$\bar{p}=\frac{1}{k}\sum_{j=1}^{k}p_{ij}$ ，$\lambda_{j}\in \mathbb{R}$ 为其特征值。定义去中心化的点坐标 $p_{i}&rsquo;=p_{i}-\bar{p}=(x_{i}&rsquo;,y_{i}&rsquo;,z_{i}&rsquo;)$，将 $C$ 展开：</p><div>$$
+C =
+\frac{1}{k} \sum_{i=1}^{k}
+\begin{bmatrix}
+x_i'^2 & x_i' y_i' & x_i' z_i' \\
+x_i' y_i' & y_i'^2 & y_i' z_i' \\
+x_i' z_i' & y_i' z_i' & z_i'^2
+\end{bmatrix}
+=\begin{bmatrix}
+\sigma_{xx} & \sigma_{xy} & \sigma_{xz} \\
+\sigma_{yx} & \sigma_{yy} & \sigma_{yz} \\
+\sigma_{zx} & \sigma_{zy} & \sigma_{zz} \\
+\end{bmatrix}
+$$</div><p>可以观察到 $C$ 是一个实对称半正定矩阵，主对角线元素代表集合 $\mathcal{P}^k$ 在 $x,y,z$ 方向上的方差，非对角元素表示不同坐标轴之间的协方差。根据谱定理，实对称矩阵 $C$ 可被分解为：</p><div>$$
+C=Q\Lambda Q^{T}=Q\Lambda Q^{-1},~Q=[\vec{v_{0}},\vec{v_{1}},\vec{v_{2}}],~\Lambda=\mathrm{diag}(\lambda_{0}, \lambda_{1}, \lambda_{2})
+$$</div><blockquote><p>实对称矩阵，其逆等于其转置</p></blockquote><p>可以将其视为某个二次型的矩阵，定义二次型函数 $Q(x)$：</p><div>$$
+Q(x)=x^{T}C^{-1}x
+$$</div><p>对 $C$ 做特征分解：</p><div>$$
+Q(x)=x^{T}C^{-1}x=(x^T Q)\Lambda^{-1} (Q^T x)
+$$</div><p>记 $y=Q^T x$，$y$ 为切线空间下的坐标，原二次型转换为：</p><blockquote><p>假定特征向量均已经过归一化</p></blockquote><div>$$
+Q(x)=y^{T}\Lambda^{-1}y=\sum_{j=1}^{n} \frac{y_{j}^2}{\lambda_{j}}=\frac{y_{0}^{2}}{\lambda_{0}}+\frac{y_{1}^{2}}{\lambda_{1}}+\frac{y_{2}^{2}}{\lambda_{2}}=1
+$$</div><p>其中，$y_{j}$ 为 $x$ 在协方差矩阵第 $j$ 个特征向量方向的投影。所以在几何角度上，可以把协方差矩阵 $C$ 视为定义了一个拟合点集的椭球体。</p><p><img loading=lazy src=https://raw.gitmirror.com/congyuxiaoyoudao/Picgo-ImageBed/main/TA-interludes/Interlude%204.EstimateNormalFromPointCloud/202507041706065.png#center></p><p>$C$ 的特征向量 $\vec{v_{j}}$ 构成一个三维正交基（切线空间基），代表集合 $\mathcal{P}^k$ 的三个主成分（Principle Components）。如果 $C$ 表示的椭球接近一个平面，则集合 $\mathcal{P}^k$ 在垂直于平面的方向上变化最小，即该方向的方差最小、特征值最小。考虑 $0\leq \lambda_{0}\leq \lambda_{1}\leq \lambda_{2}$，最小的特征值 $\lambda_{0}$ 对应的特征向量 $\vec{v_{0}}$ 即为拟合平面的法线。</p><p><img loading=lazy src=https://raw.gitmirror.com/congyuxiaoyoudao/Picgo-ImageBed/main/TA-interludes/Interlude%204.EstimateNormalFromPointCloud/202507041712165.png#center></p><h3 id=k-neighborhood-selection>K-Neighborhood Selection<a hidden class=anchor aria-hidden=true href=#k-neighborhood-selection>#</a></h3><p>如上文所述，计算点云中某点的法线需要选取与该点距离最近的 $k$ 个点（K-Neighborhood）进行估计。因此，$k$ 值的选取对于估计法线的质量有着极大影响：</p><ul><li>较大的 $k$ 尺度会导致邻域点集较大，从而引入额外噪声，导致估计的点法向失真</li><li>较小的 $k$ 尺度可以捕捉局部细节，但容易受局部非均匀采样的影响，导致大范围内法线方向不稳定，并且增大开销</li></ul><p><img alt="左：较小的 k，右：较大的 k，Point Cloud Library" loading=lazy src=https://raw.gitmirror.com/congyuxiaoyoudao/Picgo-ImageBed/main/TA-interludes/Interlude%204.EstimateNormalFromPointCloud/202507032022231.jpeg#center></p><blockquote><p>个人感觉是采样频率的问题，高频相对低频能够更好地捕捉细节，但也更容易受到噪声的干扰</p></blockquote><p>一般地，$k$ 值的选取可以让用户凭经验选择阈值，然而固定的阈值无法应对一些复杂（频率、空间分布不均匀）的点云，一种更好地方式是自适应地选取 $k$ 值。根据当前估计点的场景及其所需细节程度选取阈值，例如，在一些高频区域（潜在表面的转角、连接处）使用较小的 $k$，而在其它情况下可以使用较大的 $k$。判断给定点的所需细节程度可以通过分析其密度、曲率等因素。</p><h3 id=翻转法线>翻转法线<a hidden class=anchor aria-hidden=true href=#翻转法线>#</a></h3><p>PCA 方法估计的法线方向如下图左、中所示，在同一个平面上出现了向内和向外两种方向的法线；下图右则为扩展高斯图像（Extended Gaussian Image），描述了点云所有法线方向，由于数据集是 2.5D 的（即从单一视点下采集），因此法线只应分布在一个半球范围内，而实际上它们分布在整个球上。</p><p><img alt="左中：使用 PCA 得到的朝向不连续的法线，右：结果的 EGI，Point Cloud Library" loading=lazy src=https://raw.gitmirror.com/congyuxiaoyoudao/Picgo-ImageBed/main/TA-interludes/Interlude%204.EstimateNormalFromPointCloud/202507032034717.png#center></p><p>为了使所有法线都以各自不同的程度朝向视点 $v_{p}$，对于点 $p_{i}$ 及其法线 $\vec{n_{i}}$，应满足：</p><div>$$
+\vec{n_{i}}\cdot(v_{p}-p_{i})>0
+$$</div><p>对于不符合上式的法线，将其取反，即可得到正确朝向（朝向视点）的法线。下图给出了经该方法重定向后的点云法线：</p><p><img alt="左、中：经过重定向的法线，右：重定向后的法线 EGI，Point Cloud Library" loading=lazy src=https://raw.gitmirror.com/congyuxiaoyoudao/Picgo-ImageBed/main/TA-interludes/Interlude%204.EstimateNormalFromPointCloud/202507032053900.png#center></p><p>该方法仅在已知视点 $v_{p}$，且一个视图仅在该视点下采集时成立。当不知道视图的视点或者视图存在多个采集视点，则上述方法不成立。</p><p>综上所述，对于每个点 $p_{i}$，估计其法线的步骤如下：</p><ol><li>获得与其距离最近的 $k$ 个邻居</li><li>计算 $p_{i}$ 的法线</li><li>检查计算出的法线是否朝向视点，否则翻转</li></ol><hr><h2 id=0x03-利用-pcl-实现>0x03 利用 PCL 实现<a hidden class=anchor aria-hidden=true href=#0x03-利用-pcl-实现>#</a></h2><p>PCL（Point Cloud Library）是一个开源的点云处理库，专门用于处理三维点云数据。PCL 集成了包括点云文件的读写、特征提取、分割配准、可视化等模块，可以方便地处理、分析点云数据。此次从点云估计法线的任务可以借助 PCL 完成，我的配置信息为：</p><ul><li>平台：Windows 11</li><li>PCL 版本：PCL 1.15.0</li><li>IDE：VisualStudio 2022</li></ul><p>PCL 可在 Github 官方仓库下载：</p><p><a href=https://github.com/PointCloudLibrary/pcl/releases>Releases · PointCloudLibrary/pcl</a></p><p>配置过程可参考：</p><p><a href=https://blog.csdn.net/jing_zhong/article/details/118696089>PCL点云库安装及学习（2021.7.28）</a></p><h3 id=trouble-shooting>Trouble Shooting<a hidden class=anchor aria-hidden=true href=#trouble-shooting>#</a></h3><p>配置过程中遇到了一些问题，这里一并提一下：</p><ol><li>error: PCL requires C++14 or above</li><li>error: Potential runtime error due to aligned malloc mismatch! You likely have to compile your code with AVX enabled or define EIGEN_MAX_ALIGN_BYTES=32</li><li>[pcl::PCDReader::read] Could not find file (乱码)</li><li>Assertion failed: index > 0 && index &lt; count, file C:\Program Files\flann\include\flann/algorithms/kdtree_single_index.h, line 492</li></ol><p>第一个问题默认的 C++ 版本太低，在项目&ndash;>属性&ndash;>C/C++&ndash;>语言&ndash;>C++语言标准中选择更高版本（17 或 20）即可。</p><p>第二个问题，内存对齐问题，可以通过改变指令集解决，在项目&ndash;>属性&ndash;>C/C++&ndash;>代码生成&ndash;>启用增强指令集中选择高级矢量扩展 (X86/X64) (/arch:AVX) 即可。</p><p>第三个问题，下载的 PCL 在根目录以及第三方依赖的 lib 目录下会提供 Debug 和 Release 两种版本的库，其中 PCL 的 lib 文件中 Debug 版本的库在文件名末尾会以‘d’标识，而第三方依赖的库则会以‘-gd-’标识。链接器链接动态库时把 Debug 和 Release 版本的混淆了，所以在项目&ndash;>属性&ndash;>链接器&ndash;>输入&ndash;>附加依赖项中只填入对应版本的库即可。</p><p>第四个问题，表面上是断言 k-d tree 建树错误，然而检查了一下原始数据，发现是文件错了，数据包含了 e+23 和 e-20 这种极端值。重新下载原始文件就正常了，推测是中途改了一遍编码格式导致的。</p><h3 id=code>Code<a hidden class=anchor aria-hidden=true href=#code>#</a></h3><div class=highlight><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=line><span class=ln> 1</span><span class=cl><span class=cp>#include</span> <span class=cpf>&lt;pcl/io/ply_io.h&gt;</span><span class=cp>
+</span></span></span><span class=line><span class=ln> 2</span><span class=cl><span class=cp>#include</span> <span class=cpf>&lt;pcl/point_types.h&gt;</span><span class=cp>
+</span></span></span><span class=line><span class=ln> 3</span><span class=cl><span class=cp>#include</span> <span class=cpf>&lt;pcl/filters/filter.h&gt;</span><span class=cp>
+</span></span></span><span class=line><span class=ln> 4</span><span class=cl><span class=cp>#include</span> <span class=cpf>&lt;pcl/features/normal_3d.h&gt;</span><span class=cp>
+</span></span></span><span class=line><span class=ln> 5</span><span class=cl><span class=cp>#include</span> <span class=cpf>&lt;pcl/visualization/pcl_visualizer.h&gt;</span><span class=cp>
+</span></span></span><span class=line><span class=ln> 6</span><span class=cl><span class=cp></span>
+</span></span><span class=line><span class=ln> 7</span><span class=cl><span class=kt>int</span> <span class=nf>main</span><span class=p>()</span> <span class=p>{</span>
+</span></span><span class=line><span class=ln> 8</span><span class=cl>    <span class=c1>// read ply file
+</span></span></span><span class=line><span class=ln> 9</span><span class=cl><span class=c1></span>    <span class=n>pcl</span><span class=o>::</span><span class=n>PointCloud</span><span class=o>&lt;</span><span class=n>pcl</span><span class=o>::</span><span class=n>PointXYZ</span><span class=o>&gt;::</span><span class=n>Ptr</span> <span class=n>cloud</span><span class=p>(</span><span class=k>new</span> <span class=n>pcl</span><span class=o>::</span><span class=n>PointCloud</span><span class=o>&lt;</span><span class=n>pcl</span><span class=o>::</span><span class=n>PointXYZ</span><span class=o>&gt;</span><span class=p>);</span>
+</span></span><span class=line><span class=ln>10</span><span class=cl>    <span class=k>if</span> <span class=p>(</span><span class=n>pcl</span><span class=o>::</span><span class=n>io</span><span class=o>::</span><span class=n>loadPLYFile</span><span class=o>&lt;</span><span class=n>pcl</span><span class=o>::</span><span class=n>PointXYZ</span><span class=o>&gt;</span><span class=p>(</span><span class=s>&#34;Test.ply&#34;</span><span class=p>,</span> <span class=o>*</span><span class=n>cloud</span><span class=p>)</span> <span class=o>!=</span> <span class=mi>0</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=ln>11</span><span class=cl>        <span class=n>PCL_ERROR</span><span class=p>(</span><span class=s>&#34;Failed to load point cloud file!&#34;</span><span class=p>);</span>
+</span></span><span class=line><span class=ln>12</span><span class=cl>        <span class=k>return</span> <span class=o>-</span><span class=mi>1</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>13</span><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=ln>14</span><span class=cl>    <span class=c1>//[DEBUG]: check data
+</span></span></span><span class=line><span class=ln>15</span><span class=cl><span class=c1></span>    <span class=c1>//std::cout &lt;&lt; &#34;Loaded cloud size: &#34; &lt;&lt; cloud-&gt;size() &lt;&lt; std::endl;
+</span></span></span><span class=line><span class=ln>16</span><span class=cl><span class=c1></span>    <span class=c1>//for (size_t i = 0; i &lt; std::min&lt;size_t&gt;(10, cloud-&gt;size()); ++i) {
+</span></span></span><span class=line><span class=ln>17</span><span class=cl><span class=c1></span>    <span class=c1>//    auto&amp; pt = cloud-&gt;points[i];
+</span></span></span><span class=line><span class=ln>18</span><span class=cl><span class=c1></span>    <span class=c1>//    std::cout &lt;&lt; i &lt;&lt; &#34;: (&#34; &lt;&lt; pt.x &lt;&lt; &#34;, &#34; &lt;&lt; pt.y &lt;&lt; &#34;, &#34; &lt;&lt; pt.z &lt;&lt; &#34;)\n&#34;;
+</span></span></span><span class=line><span class=ln>19</span><span class=cl><span class=c1></span>    <span class=c1>//}
+</span></span></span><span class=line><span class=ln>20</span><span class=cl><span class=c1></span>
+</span></span><span class=line><span class=ln>21</span><span class=cl>    <span class=c1>// filter invalid points
+</span></span></span><span class=line><span class=ln>22</span><span class=cl><span class=c1></span>    <span class=n>pcl</span><span class=o>::</span><span class=n>PointCloud</span><span class=o>&lt;</span><span class=n>pcl</span><span class=o>::</span><span class=n>PointXYZ</span><span class=o>&gt;::</span><span class=n>Ptr</span> <span class=n>cloud_filtered</span><span class=p>(</span><span class=k>new</span> <span class=n>pcl</span><span class=o>::</span><span class=n>PointCloud</span><span class=o>&lt;</span><span class=n>pcl</span><span class=o>::</span><span class=n>PointXYZ</span><span class=o>&gt;</span><span class=p>);</span>
+</span></span><span class=line><span class=ln>23</span><span class=cl>    <span class=n>std</span><span class=o>::</span><span class=n>vector</span><span class=o>&lt;</span><span class=kt>int</span><span class=o>&gt;</span> <span class=n>nan_indices</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>24</span><span class=cl>    <span class=n>pcl</span><span class=o>::</span><span class=n>removeNaNFromPointCloud</span><span class=p>(</span><span class=o>*</span><span class=n>cloud</span><span class=p>,</span> <span class=o>*</span><span class=n>cloud_filtered</span><span class=p>,</span> <span class=n>nan_indices</span><span class=p>);</span>
+</span></span><span class=line><span class=ln>25</span><span class=cl>    <span class=k>if</span> <span class=p>(</span><span class=n>cloud</span><span class=o>-&gt;</span><span class=n>empty</span><span class=p>())</span> <span class=p>{</span>
+</span></span><span class=line><span class=ln>26</span><span class=cl>        <span class=n>PCL_ERROR</span><span class=p>(</span><span class=s>&#34;Error: Point cloud is empty after removing NaNs!&#34;</span><span class=p>);</span>
+</span></span><span class=line><span class=ln>27</span><span class=cl>        <span class=k>return</span> <span class=o>-</span><span class=mi>1</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>28</span><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=ln>29</span><span class=cl>
+</span></span><span class=line><span class=ln>30</span><span class=cl>    <span class=c1>// estimate normal
+</span></span></span><span class=line><span class=ln>31</span><span class=cl><span class=c1></span>    <span class=n>pcl</span><span class=o>::</span><span class=n>NormalEstimation</span><span class=o>&lt;</span><span class=n>pcl</span><span class=o>::</span><span class=n>PointXYZ</span><span class=p>,</span> <span class=n>pcl</span><span class=o>::</span><span class=n>Normal</span><span class=o>&gt;</span> <span class=n>ne</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>32</span><span class=cl>    <span class=n>ne</span><span class=p>.</span><span class=n>setInputCloud</span><span class=p>(</span><span class=n>cloud_filtered</span><span class=p>);</span>
+</span></span><span class=line><span class=ln>33</span><span class=cl>    <span class=n>ne</span><span class=p>.</span><span class=n>setViewPoint</span><span class=p>(</span><span class=mf>100.0</span><span class=p>,</span> <span class=mf>0.0</span><span class=p>,</span> <span class=mf>0.0</span><span class=p>);</span>
+</span></span><span class=line><span class=ln>34</span><span class=cl>    <span class=n>pcl</span><span class=o>::</span><span class=n>search</span><span class=o>::</span><span class=n>KdTree</span><span class=o>&lt;</span><span class=n>pcl</span><span class=o>::</span><span class=n>PointXYZ</span><span class=o>&gt;::</span><span class=n>Ptr</span> <span class=n>tree</span><span class=p>(</span><span class=k>new</span> <span class=n>pcl</span><span class=o>::</span><span class=n>search</span><span class=o>::</span><span class=n>KdTree</span><span class=o>&lt;</span><span class=n>pcl</span><span class=o>::</span><span class=n>PointXYZ</span><span class=o>&gt;</span><span class=p>());</span>
+</span></span><span class=line><span class=ln>35</span><span class=cl>    <span class=n>ne</span><span class=p>.</span><span class=n>setSearchMethod</span><span class=p>(</span><span class=n>tree</span><span class=p>);</span>
+</span></span><span class=line><span class=ln>36</span><span class=cl>    <span class=n>ne</span><span class=p>.</span><span class=n>setKSearch</span><span class=p>(</span><span class=mi>100</span><span class=p>);</span>
+</span></span><span class=line><span class=ln>37</span><span class=cl>
+</span></span><span class=line><span class=ln>38</span><span class=cl>    <span class=n>pcl</span><span class=o>::</span><span class=n>PointCloud</span><span class=o>&lt;</span><span class=n>pcl</span><span class=o>::</span><span class=n>Normal</span><span class=o>&gt;::</span><span class=n>Ptr</span> <span class=n>normals</span><span class=p>(</span><span class=k>new</span> <span class=n>pcl</span><span class=o>::</span><span class=n>PointCloud</span><span class=o>&lt;</span><span class=n>pcl</span><span class=o>::</span><span class=n>Normal</span><span class=o>&gt;</span><span class=p>);</span>
+</span></span><span class=line><span class=ln>39</span><span class=cl>    <span class=n>ne</span><span class=p>.</span><span class=n>compute</span><span class=p>(</span><span class=o>*</span><span class=n>normals</span><span class=p>);</span>
+</span></span><span class=line><span class=ln>40</span><span class=cl>
+</span></span><span class=line><span class=ln>41</span><span class=cl>    <span class=c1>// vis
+</span></span></span><span class=line><span class=ln>42</span><span class=cl><span class=c1></span>    <span class=n>pcl</span><span class=o>::</span><span class=n>visualization</span><span class=o>::</span><span class=n>PCLVisualizer</span> <span class=n>viewer</span><span class=p>(</span><span class=s>&#34;Normals&#34;</span><span class=p>);</span>
+</span></span><span class=line><span class=ln>43</span><span class=cl>    <span class=n>viewer</span><span class=p>.</span><span class=n>addPointCloud</span><span class=p>(</span><span class=n>cloud_filtered</span><span class=p>,</span> <span class=s>&#34;cloud&#34;</span><span class=p>);</span>
+</span></span><span class=line><span class=ln>44</span><span class=cl>    <span class=n>viewer</span><span class=p>.</span><span class=n>setPointCloudRenderingProperties</span><span class=p>(</span>
+</span></span><span class=line><span class=ln>45</span><span class=cl>        <span class=n>pcl</span><span class=o>::</span><span class=n>visualization</span><span class=o>::</span><span class=n>PCL_VISUALIZER_COLOR</span><span class=p>,</span>
+</span></span><span class=line><span class=ln>46</span><span class=cl>        <span class=mi>0</span><span class=p>,</span> <span class=mi>1</span><span class=p>,</span> <span class=mi>0</span><span class=p>,</span>
+</span></span><span class=line><span class=ln>47</span><span class=cl>        <span class=s>&#34;cloud&#34;</span>
+</span></span><span class=line><span class=ln>48</span><span class=cl>    <span class=p>);</span>
+</span></span><span class=line><span class=ln>49</span><span class=cl>    <span class=n>viewer</span><span class=p>.</span><span class=n>addPointCloudNormals</span><span class=o>&lt;</span><span class=n>pcl</span><span class=o>::</span><span class=n>PointXYZ</span><span class=p>,</span> <span class=n>pcl</span><span class=o>::</span><span class=n>Normal</span><span class=o>&gt;</span><span class=p>(</span><span class=n>cloud_filtered</span><span class=p>,</span> <span class=n>normals</span><span class=p>,</span> <span class=mi>10</span><span class=p>,</span> <span class=mf>0.05</span><span class=p>,</span> <span class=s>&#34;normals&#34;</span><span class=p>);</span>
+</span></span><span class=line><span class=ln>50</span><span class=cl>    
+</span></span><span class=line><span class=ln>51</span><span class=cl>    <span class=k>while</span> <span class=p>(</span><span class=o>!</span><span class=n>viewer</span><span class=p>.</span><span class=n>wasStopped</span><span class=p>())</span> <span class=p>{</span>
+</span></span><span class=line><span class=ln>52</span><span class=cl>        <span class=n>viewer</span><span class=p>.</span><span class=n>spinOnce</span><span class=p>();</span>
+</span></span><span class=line><span class=ln>53</span><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=ln>54</span><span class=cl><span class=p>}</span>
+</span></span></code></pre></div><p>运行程序，不出意外就能看到法线：</p><p><img alt="viewpoint=(0,0,0), k=20" loading=lazy src=https://raw.gitmirror.com/congyuxiaoyoudao/Picgo-ImageBed/main/TA-interludes/Interlude%204.EstimateNormalFromPointCloud/202507041557150.png#center></p><p><img alt="viewpoint=(0,0,0), k=100" loading=lazy src=https://raw.gitmirror.com/congyuxiaoyoudao/Picgo-ImageBed/main/TA-interludes/Interlude%204.EstimateNormalFromPointCloud/202507041610567.png#center></p><p><img alt="viewpoint=(100,0,0), k=100" loading=lazy src=https://raw.gitmirror.com/congyuxiaoyoudao/Picgo-ImageBed/main/TA-interludes/Interlude%204.EstimateNormalFromPointCloud/202507041634825.png#center></p><p>可以观察到由于选取的点云为平面，较大的 $k$ 值得到的法线在整个平面上朝向更加均匀，且在转角处有更为平滑的过渡。</p><hr><h2 id=0x04-在-cloudcompare-中实现>0x04 在 CloudCompare 中实现<a hidden class=anchor aria-hidden=true href=#0x04-在-cloudcompare-中实现>#</a></h2><p><img loading=lazy src=https://raw.gitmirror.com/congyuxiaoyoudao/Picgo-ImageBed/main/TA-interludes/Interlude%204.EstimateNormalFromPointCloud/202507041554227.png#center></p><p>然后按照指示选择合适的 Local surface model、Neighbors、Orientation，即可计算法线，最后选中点云，在 Properties 栏中对法线进行可视化：</p><p><img loading=lazy src=https://raw.gitmirror.com/congyuxiaoyoudao/Picgo-ImageBed/main/TA-interludes/Interlude%204.EstimateNormalFromPointCloud/202507041544308.png#center></p></div><footer class=post-footer><ul class=post-tags><li><a href=https://congyuxiaoyoudao.github.io/tags/%E7%82%B9%E4%BA%91/>点云</a></li><li><a href=https://congyuxiaoyoudao.github.io/tags/%E6%B3%95%E7%BA%BF/>法线</a></li></ul><nav class=paginav><a class=next href=https://congyuxiaoyoudao.github.io/posts/interludes/webgpu-from-scratch/><span class=title>下一页 »</span><br><span>Interlude 3. WebGPU From Scratch</span></a></nav></footer><div id=tw-comment></div><script>const getStoredTheme=()=>localStorage.getItem("pref-theme")==="light"?"light":"noborder_dark",setGiscusTheme=()=>{const e=e=>{const t=document.querySelector("iframe.giscus-frame");t&&t.contentWindow.postMessage({giscus:e},"https://giscus.app")};e({setConfig:{theme:getStoredTheme()}})};document.addEventListener("DOMContentLoaded",()=>{const s={src:"https://giscus.app/client.js","data-repo":"congyuxiaoyoudao/congyuxiaoyoudao.github.io","data-repo-id":"","data-category":"Announcements","data-category-id":"","data-mapping":"pathname","data-strict":"0","data-reactions-enabled":"","data-emit-metadata":"","data-input-position":"","data-theme":getStoredTheme(),"data-lang":"zh-CN","data-loading":"lazy",crossorigin:"anonymous"},e=document.createElement("script");Object.entries(s).forEach(([t,n])=>e.setAttribute(t,n)),document.querySelector("#tw-comment").appendChild(e);const t=document.querySelector("#theme-toggle");t&&t.addEventListener("click",setGiscusTheme);const n=document.querySelector("#theme-toggle-float");n&&n.addEventListener("click",setGiscusTheme)})</script></article></main><footer class=footer><span>&copy; 2025 <a href=https://congyuxiaoyoudao.github.io/>The Only Problem's Blog</a></span> ·
+<span>Powered by
+<a href=https://gohugo.io/ rel="noopener noreferrer" target=_blank>Hugo</a> &
+<a href=https://github.com/adityatelange/hugo-PaperMod/ rel=noopener target=_blank>PaperMod</a></span></footer><a href=#top aria-label="go to top" title="Go to Top (Alt + G)" class=top-link id=top-link accesskey=g><svg viewBox="0 0 12 6" fill="currentColor"><path d="M12 6H0l6-6z"/></svg>
+</a><script>let menu=document.getElementById("menu");menu&&(menu.scrollLeft=localStorage.getItem("menu-scroll-position"),menu.onscroll=function(){localStorage.setItem("menu-scroll-position",menu.scrollLeft)}),document.querySelectorAll('a[href^="#"]').forEach(e=>{e.addEventListener("click",function(e){e.preventDefault();var t=this.getAttribute("href").substr(1);window.matchMedia("(prefers-reduced-motion: reduce)").matches?document.querySelector(`[id='${decodeURIComponent(t)}']`).scrollIntoView():document.querySelector(`[id='${decodeURIComponent(t)}']`).scrollIntoView({behavior:"smooth"}),t==="top"?history.replaceState(null,null," "):history.pushState(null,null,`#${t}`)})})</script><script>var mybutton=document.getElementById("top-link");window.onscroll=function(){document.body.scrollTop>800||document.documentElement.scrollTop>800?(mybutton.style.visibility="visible",mybutton.style.opacity="1"):(mybutton.style.visibility="hidden",mybutton.style.opacity="0")}</script><script>document.getElementById("theme-toggle").addEventListener("click",()=>{document.body.className.includes("dark")?(document.body.classList.remove("dark"),localStorage.setItem("pref-theme","light")):(document.body.classList.add("dark"),localStorage.setItem("pref-theme","dark"))})</script><script>document.querySelectorAll("pre > code").forEach(e=>{const n=e.parentNode.parentNode,t=document.createElement("button");t.classList.add("copy-code"),t.innerHTML="复制";function s(){t.innerHTML="已复制！",setTimeout(()=>{t.innerHTML="复制"},2e3)}t.addEventListener("click",t=>{if("clipboard"in navigator){navigator.clipboard.writeText(e.textContent),s();return}const n=document.createRange();n.selectNodeContents(e);const o=window.getSelection();o.removeAllRanges(),o.addRange(n);try{document.execCommand("copy"),s()}catch{}o.removeRange(n)}),n.classList.contains("highlight")?n.appendChild(t):n.parentNode.firstChild==n||(e.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName=="TABLE"?e.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(t):e.parentNode.appendChild(t))})</script></body></html>
