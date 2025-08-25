@@ -6,8 +6,100 @@
     <description>Recent content in Interludes on The Only Problem&#39;s Blog</description>
     <generator>Hugo -- 0.148.2</generator>
     <language>zh</language>
-    <lastBuildDate>Wed, 02 Jul 2025 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Tue, 19 Aug 2025 00:00:00 +0000</lastBuildDate>
     <atom:link href="https://congyuxiaoyoudao.github.io/posts/interludes/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Interlude 5. Poisson Reconstruction</title>
+      <link>https://congyuxiaoyoudao.github.io/posts/interludes/poisson-reconstruction/</link>
+      <pubDate>Tue, 19 Aug 2025 00:00:00 +0000</pubDate>
+      <guid>https://congyuxiaoyoudao.github.io/posts/interludes/poisson-reconstruction/</guid>
+      <description>&lt;hr&gt;
+&lt;h2 id=&#34;0x00-to-begin-with&#34;&gt;0x00 To begin with&lt;/h2&gt;
+&lt;p&gt;这篇文章将会包含以下内容：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;input checked=&#34;&#34; disabled=&#34;&#34; type=&#34;checkbox&#34;&gt; 泊松重建的一些前置数学知识&lt;/li&gt;
+&lt;li&gt;&lt;input checked=&#34;&#34; disabled=&#34;&#34; type=&#34;checkbox&#34;&gt; 泊松重建算法原理及推导过程&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;strong&gt;For reference&lt;/strong&gt;：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;📺 
+
+
+
+
+
+
+
+  
+  &lt;a href=&#34;https://www.youtube.com/watch?v=nmvs0vrBT18&#34;&gt;Laplace&amp;rsquo;s Equation and Poisson&amp;rsquo;s Equation&lt;/a&gt;
+
+&lt;/li&gt;
+&lt;li&gt;📖 
+
+
+
+
+
+
+
+  
+  &lt;a href=&#34;https://www.zhihu.com/question/25481998&#34;&gt;如何通俗地理解拉普拉斯方程、泊松方程、亥姆霍兹方程？&lt;/a&gt;
+
+&lt;/li&gt;
+&lt;li&gt;📖 
+
+
+
+
+
+
+
+  
+  &lt;a href=&#34;https://zhuanlan.zhihu.com/p/107653198&#34;&gt;泊松表面重建详解&lt;/a&gt;
+
+&lt;/li&gt;
+&lt;li&gt;📃 
+
+
+
+
+
+
+
+  
+  &lt;a href=&#34;https://hhoppe.com/poissonrecon.pdf&#34;&gt;Poisson Surface Reconstruction&lt;/a&gt;
+
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;0x01-隐函数表达-implicit-expression&#34;&gt;0x01 隐函数表达 Implicit Expression&lt;/h2&gt;
+&lt;p&gt;表达一个三维曲面，例如球心位于原点、半径为 $r$ 的球面，可以使用球的标准方程：&lt;/p&gt;
+&lt;div&gt;$$
+F(x,y,z):x^{2}+y^{2}+z^{2}-r^{2}=0
+$$&lt;/div&gt;
+该方程（形如 $F(x,y,z)=0$）就定义了球面的隐函数表达，它将所有变量都放在等式一侧，隐含了因变量关于自变量的函数关系，在描述球面的情况下，$z$ 关于 $x,y$ 的关系可以显化为：
+&lt;div&gt;$$
+z=\sqrt{ r^{2}-x^{2}-y^{2} }
+$$&lt;/div&gt;
+这就是隐函数的一种显式表达，它描述球面在 $xOy$ 平面以上的部分。如果需要描述整个球面，还需要 $xOy$ 平面以下的部分：
+&lt;div&gt;$$
+z=-\sqrt{ r^{2}-x^{2}-y^{2} }
+$$&lt;/div&gt;
+也就是说显化的隐函数可能无法覆盖所有满足隐函数方程的解集，因为显函数是一一映射，而隐函数可能是一对多或者多对多的映射。
+&lt;p&gt;在计算机图形学中，SDF 就是一种常用的可以描述表面的隐函数表达：&lt;/p&gt;
+&lt;div&gt;$$
+\phi(\mathbf{x})=\pm \text{dist}(\mathbf{x},\partial \Omega)
+$$&lt;/div&gt;
+SDF 以物体表面为界，空间中任意一点 $\mathbf{x}$ 的 SDF 函数值为与物体表面的带符号距离（物体内部为负、外部为正）。自然的，物体表面可以用 SDF 值为零的水平集描述：
+&lt;div&gt;$$
+\{\mathbf{x}\,|\,\phi(\mathbf{x})=0\}
+$$&lt;/div&gt;
+![使用 SDF 的零水平集描述表面，Jeong et.al](https://raw.gitmirror.com/congyuxiaoyoudao/Picgo-ImageBed/main/TA-interludes/Interlude%205.PoissonRecon/202508201058142.png#center)
+&lt;hr&gt;
+&lt;h2 id=&#34;0x02-泊松方程-poisson-equation&#34;&gt;0x02 泊松方程 Poisson Equation&lt;/h2&gt;
+&lt;blockquote&gt;
+&lt;p&gt;泊松表面重建其实不需要对泊松方程有什么很深刻的数学物理了解，笔者也非相关专业，所以就仅凭自己的想法写一点更为直观的解释&lt;/p&gt;</description>
+    </item>
     <item>
       <title>Interlude 4. 在点云数据中估计法线</title>
       <link>https://congyuxiaoyoudao.github.io/posts/interludes/estimatenormals/</link>

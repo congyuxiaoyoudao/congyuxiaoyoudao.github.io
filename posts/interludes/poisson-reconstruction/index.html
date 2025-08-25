@@ -1,0 +1,250 @@
+<!doctype html><html lang=zh dir=auto><head><meta charset=utf-8><meta http-equiv=X-UA-Compatible content="IE=edge"><meta name=viewport content="width=device-width,initial-scale=1,shrink-to-fit=no"><meta name=robots content="index, follow"><title>Interlude 5. Poisson Reconstruction | The Only Problem's Blog</title><meta name=keywords content="点云,三维重建"><meta name=description content="
+0x00 To begin with
+这篇文章将会包含以下内容：
+
+ 泊松重建的一些前置数学知识
+ 泊松重建算法原理及推导过程
+
+For reference：
+
+📺 
+
+
+
+
+
+
+
+  
+  Laplace&rsquo;s Equation and Poisson&rsquo;s Equation
+
+
+📖 
+
+
+
+
+
+
+
+  
+  如何通俗地理解拉普拉斯方程、泊松方程、亥姆霍兹方程？
+
+
+📖 
+
+
+
+
+
+
+
+  
+  泊松表面重建详解
+
+
+📃 
+
+
+
+
+
+
+
+  
+  Poisson Surface Reconstruction
+
+
+
+
+0x01 隐函数表达 Implicit Expression
+表达一个三维曲面，例如球心位于原点、半径为 $r$ 的球面，可以使用球的标准方程：
+$$
+F(x,y,z):x^{2}+y^{2}+z^{2}-r^{2}=0
+$$
+该方程（形如 $F(x,y,z)=0$）就定义了球面的隐函数表达，它将所有变量都放在等式一侧，隐含了因变量关于自变量的函数关系，在描述球面的情况下，$z$ 关于 $x,y$ 的关系可以显化为：
+$$
+z=\sqrt{ r^{2}-x^{2}-y^{2} }
+$$
+这就是隐函数的一种显式表达，它描述球面在 $xOy$ 平面以上的部分。如果需要描述整个球面，还需要 $xOy$ 平面以下的部分：
+$$
+z=-\sqrt{ r^{2}-x^{2}-y^{2} }
+$$
+也就是说显化的隐函数可能无法覆盖所有满足隐函数方程的解集，因为显函数是一一映射，而隐函数可能是一对多或者多对多的映射。
+在计算机图形学中，SDF 就是一种常用的可以描述表面的隐函数表达：
+$$
+\phi(\mathbf{x})=\pm \text{dist}(\mathbf{x},\partial \Omega)
+$$
+SDF 以物体表面为界，空间中任意一点 $\mathbf{x}$ 的 SDF 函数值为与物体表面的带符号距离（物体内部为负、外部为正）。自然的，物体表面可以用 SDF 值为零的水平集描述：
+$$
+\{\mathbf{x}\,|\,\phi(\mathbf{x})=0\}
+$$
+![使用 SDF 的零水平集描述表面，Jeong et.al](https://raw.gitmirror.com/congyuxiaoyoudao/Picgo-ImageBed/main/TA-interludes/Interlude%205.PoissonRecon/202508201058142.png#center)
+
+0x02 泊松方程 Poisson Equation
+
+泊松表面重建其实不需要对泊松方程有什么很深刻的数学物理了解，笔者也非相关专业，所以就仅凭自己的想法写一点更为直观的解释"><meta name=author content="The Only Problem"><link rel=canonical href=https://congyuxiaoyoudao.github.io/posts/interludes/poisson-reconstruction/><link crossorigin=anonymous href=/assets/css/stylesheet.452758010f0b7fc9ad7fa528ffdfdd8eb9e830816fb8c8119f16f39583297db8.css integrity="sha256-RSdYAQ8Lf8mtf6Uo/9/djrnoMIFvuMgRnxbzlYMpfbg=" rel="preload stylesheet" as=style><link rel=icon href=https://congyuxiaoyoudao.github.io/favicon.ico><link rel=icon type=image/png sizes=16x16 href=https://congyuxiaoyoudao.github.io/favicon-16x16.png><link rel=icon type=image/png sizes=32x32 href=https://congyuxiaoyoudao.github.io/favicon-32x32.png><link rel=apple-touch-icon href=https://congyuxiaoyoudao.github.io/apple-touch-icon.png><link rel=mask-icon href=https://congyuxiaoyoudao.github.io/safari-pinned-tab.svg><meta name=theme-color content="#2e2e33"><meta name=msapplication-TileColor content="#2e2e33"><link rel=alternate hreflang=zh href=https://congyuxiaoyoudao.github.io/posts/interludes/poisson-reconstruction/><noscript><style>#theme-toggle,.top-link{display:none}</style><style>@media(prefers-color-scheme:dark){:root{--theme:rgb(29, 30, 32);--entry:rgb(46, 46, 51);--primary:rgb(218, 218, 219);--secondary:rgb(155, 156, 157);--tertiary:rgb(65, 66, 68);--content:rgb(196, 196, 197);--code-block-bg:rgb(46, 46, 51);--code-bg:rgb(55, 56, 62);--border:rgb(51, 51, 51)}.list{background:var(--theme)}.list:not(.dark)::-webkit-scrollbar-track{background:0 0}.list:not(.dark)::-webkit-scrollbar-thumb{border-color:var(--theme)}}</style></noscript><link rel=stylesheet href=https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/katex.min.css integrity=sha384-wcIxkf4k558AjM3Yz3BBFQUbk/zgIYC2R0QpeeYb+TwlBVMrlgLqwRjRtGZiK7ww crossorigin=anonymous><script defer src=https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/katex.min.js integrity=sha384-hIoBPJpTUs74ddyc4bFZSM1TVlQDA60VBbJS0oA934VSz82sBx1X7kSx2ATBDIyd crossorigin=anonymous></script><script defer src=https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/contrib/auto-render.min.js integrity=sha384-43gviWU0YVjaDtb/GhzOouOXtZMP/7XUzwPTstBeZFe/+rCMvRwr4yROQP43s0Xk crossorigin=anonymous onload='window.addEventListener("DOMContentLoaded",function(){renderMathInElement(document.body,{delimiters:[{left:"$$",right:"$$",display:!0},{left:"$",right:"$",display:!1},{left:"\\$$",right:"\\\\$$",display:!1},{left:"\\$$",right:"\\\\$$",display:!0}]})})'></script><link rel=preconnect href=https://fonts.googleapis.com><link rel=preconnect href=https://fonts.gstatic.com crossorigin><link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap" rel=stylesheet><link rel=stylesheet href=https://cdn.bootcdn.net/ajax/libs/lxgw-wenkai-screen-webfont/1.7.0/style.min.css><meta property="og:url" content="https://congyuxiaoyoudao.github.io/posts/interludes/poisson-reconstruction/"><meta property="og:site_name" content="The Only Problem's Blog"><meta property="og:title" content="Interlude 5. Poisson Reconstruction"><meta property="og:description" content=" 0x00 To begin with 这篇文章将会包含以下内容：
+泊松重建的一些前置数学知识 泊松重建算法原理及推导过程 For reference：
+📺 Laplace’s Equation and Poisson’s Equation 📖 如何通俗地理解拉普拉斯方程、泊松方程、亥姆霍兹方程？ 📖 泊松表面重建详解 📃 Poisson Surface Reconstruction 0x01 隐函数表达 Implicit Expression 表达一个三维曲面，例如球心位于原点、半径为 $r$ 的球面，可以使用球的标准方程：
+$$ F(x,y,z):x^{2}+y^{2}+z^{2}-r^{2}=0 $$ 该方程（形如 $F(x,y,z)=0$）就定义了球面的隐函数表达，它将所有变量都放在等式一侧，隐含了因变量关于自变量的函数关系，在描述球面的情况下，$z$ 关于 $x,y$ 的关系可以显化为： $$ z=\sqrt{ r^{2}-x^{2}-y^{2} } $$ 这就是隐函数的一种显式表达，它描述球面在 $xOy$ 平面以上的部分。如果需要描述整个球面，还需要 $xOy$ 平面以下的部分： $$ z=-\sqrt{ r^{2}-x^{2}-y^{2} } $$ 也就是说显化的隐函数可能无法覆盖所有满足隐函数方程的解集，因为显函数是一一映射，而隐函数可能是一对多或者多对多的映射。 在计算机图形学中，SDF 就是一种常用的可以描述表面的隐函数表达：
+$$ \phi(\mathbf{x})=\pm \text{dist}(\mathbf{x},\partial \Omega) $$ SDF 以物体表面为界，空间中任意一点 $\mathbf{x}$ 的 SDF 函数值为与物体表面的带符号距离（物体内部为负、外部为正）。自然的，物体表面可以用 SDF 值为零的水平集描述： $$ \{\mathbf{x}\,|\,\phi(\mathbf{x})=0\} $$ ![使用 SDF 的零水平集描述表面，Jeong et.al](https://raw.gitmirror.com/congyuxiaoyoudao/Picgo-ImageBed/main/TA-interludes/Interlude%205.PoissonRecon/202508201058142.png#center) 0x02 泊松方程 Poisson Equation 泊松表面重建其实不需要对泊松方程有什么很深刻的数学物理了解，笔者也非相关专业，所以就仅凭自己的想法写一点更为直观的解释"><meta property="og:locale" content="zh"><meta property="og:type" content="article"><meta property="article:section" content="posts"><meta property="article:published_time" content="2025-08-19T00:00:00+00:00"><meta property="article:modified_time" content="2025-08-19T00:00:00+00:00"><meta property="article:tag" content="点云"><meta property="article:tag" content="三维重建"><meta name=twitter:card content="summary"><meta name=twitter:title content="Interlude 5. Poisson Reconstruction"><meta name=twitter:description content="
+0x00 To begin with
+这篇文章将会包含以下内容：
+
+ 泊松重建的一些前置数学知识
+ 泊松重建算法原理及推导过程
+
+For reference：
+
+📺 
+
+
+
+
+
+
+
+  
+  Laplace&rsquo;s Equation and Poisson&rsquo;s Equation
+
+
+📖 
+
+
+
+
+
+
+
+  
+  如何通俗地理解拉普拉斯方程、泊松方程、亥姆霍兹方程？
+
+
+📖 
+
+
+
+
+
+
+
+  
+  泊松表面重建详解
+
+
+📃 
+
+
+
+
+
+
+
+  
+  Poisson Surface Reconstruction
+
+
+
+
+0x01 隐函数表达 Implicit Expression
+表达一个三维曲面，例如球心位于原点、半径为 $r$ 的球面，可以使用球的标准方程：
+$$
+F(x,y,z):x^{2}+y^{2}+z^{2}-r^{2}=0
+$$
+该方程（形如 $F(x,y,z)=0$）就定义了球面的隐函数表达，它将所有变量都放在等式一侧，隐含了因变量关于自变量的函数关系，在描述球面的情况下，$z$ 关于 $x,y$ 的关系可以显化为：
+$$
+z=\sqrt{ r^{2}-x^{2}-y^{2} }
+$$
+这就是隐函数的一种显式表达，它描述球面在 $xOy$ 平面以上的部分。如果需要描述整个球面，还需要 $xOy$ 平面以下的部分：
+$$
+z=-\sqrt{ r^{2}-x^{2}-y^{2} }
+$$
+也就是说显化的隐函数可能无法覆盖所有满足隐函数方程的解集，因为显函数是一一映射，而隐函数可能是一对多或者多对多的映射。
+在计算机图形学中，SDF 就是一种常用的可以描述表面的隐函数表达：
+$$
+\phi(\mathbf{x})=\pm \text{dist}(\mathbf{x},\partial \Omega)
+$$
+SDF 以物体表面为界，空间中任意一点 $\mathbf{x}$ 的 SDF 函数值为与物体表面的带符号距离（物体内部为负、外部为正）。自然的，物体表面可以用 SDF 值为零的水平集描述：
+$$
+\{\mathbf{x}\,|\,\phi(\mathbf{x})=0\}
+$$
+![使用 SDF 的零水平集描述表面，Jeong et.al](https://raw.gitmirror.com/congyuxiaoyoudao/Picgo-ImageBed/main/TA-interludes/Interlude%205.PoissonRecon/202508201058142.png#center)
+
+0x02 泊松方程 Poisson Equation
+
+泊松表面重建其实不需要对泊松方程有什么很深刻的数学物理了解，笔者也非相关专业，所以就仅凭自己的想法写一点更为直观的解释"><script type=application/ld+json>{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Posts","item":"https://congyuxiaoyoudao.github.io/posts/"},{"@type":"ListItem","position":2,"name":"Interludes","item":"https://congyuxiaoyoudao.github.io/posts/interludes/"},{"@type":"ListItem","position":3,"name":"Interlude 5. Poisson Reconstruction","item":"https://congyuxiaoyoudao.github.io/posts/interludes/poisson-reconstruction/"}]}</script><script type=application/ld+json>{"@context":"https://schema.org","@type":"BlogPosting","headline":"Interlude 5. Poisson Reconstruction","name":"Interlude 5. Poisson Reconstruction","description":" 0x00 To begin with 这篇文章将会包含以下内容：\n泊松重建的一些前置数学知识 泊松重建算法原理及推导过程 For reference：\n📺 Laplace\u0026rsquo;s Equation and Poisson\u0026rsquo;s Equation 📖 如何通俗地理解拉普拉斯方程、泊松方程、亥姆霍兹方程？ 📖 泊松表面重建详解 📃 Poisson Surface Reconstruction 0x01 隐函数表达 Implicit Expression 表达一个三维曲面，例如球心位于原点、半径为 $r$ 的球面，可以使用球的标准方程：\n$$ F(x,y,z):x^{2}+y^{2}+z^{2}-r^{2}=0 $$ 该方程（形如 $F(x,y,z)=0$）就定义了球面的隐函数表达，它将所有变量都放在等式一侧，隐含了因变量关于自变量的函数关系，在描述球面的情况下，$z$ 关于 $x,y$ 的关系可以显化为： $$ z=\\sqrt{ r^{2}-x^{2}-y^{2} } $$ 这就是隐函数的一种显式表达，它描述球面在 $xOy$ 平面以上的部分。如果需要描述整个球面，还需要 $xOy$ 平面以下的部分： $$ z=-\\sqrt{ r^{2}-x^{2}-y^{2} } $$ 也就是说显化的隐函数可能无法覆盖所有满足隐函数方程的解集，因为显函数是一一映射，而隐函数可能是一对多或者多对多的映射。 在计算机图形学中，SDF 就是一种常用的可以描述表面的隐函数表达：\n$$ \\phi(\\mathbf{x})=\\pm \\text{dist}(\\mathbf{x},\\partial \\Omega) $$ SDF 以物体表面为界，空间中任意一点 $\\mathbf{x}$ 的 SDF 函数值为与物体表面的带符号距离（物体内部为负、外部为正）。自然的，物体表面可以用 SDF 值为零的水平集描述： $$ \\{\\mathbf{x}\\,|\\,\\phi(\\mathbf{x})=0\\} $$ ![使用 SDF 的零水平集描述表面，Jeong et.al](https://raw.gitmirror.com/congyuxiaoyoudao/Picgo-ImageBed/main/TA-interludes/Interlude%205.PoissonRecon/202508201058142.png#center) 0x02 泊松方程 Poisson Equation 泊松表面重建其实不需要对泊松方程有什么很深刻的数学物理了解，笔者也非相关专业，所以就仅凭自己的想法写一点更为直观的解释\n","keywords":["点云","三维重建"],"articleBody":" 0x00 To begin with 这篇文章将会包含以下内容：\n泊松重建的一些前置数学知识 泊松重建算法原理及推导过程 For reference：\n📺 Laplace’s Equation and Poisson’s Equation 📖 如何通俗地理解拉普拉斯方程、泊松方程、亥姆霍兹方程？ 📖 泊松表面重建详解 📃 Poisson Surface Reconstruction 0x01 隐函数表达 Implicit Expression 表达一个三维曲面，例如球心位于原点、半径为 $r$ 的球面，可以使用球的标准方程：\n$$ F(x,y,z):x^{2}+y^{2}+z^{2}-r^{2}=0 $$ 该方程（形如 $F(x,y,z)=0$）就定义了球面的隐函数表达，它将所有变量都放在等式一侧，隐含了因变量关于自变量的函数关系，在描述球面的情况下，$z$ 关于 $x,y$ 的关系可以显化为： $$ z=\\sqrt{ r^{2}-x^{2}-y^{2} } $$ 这就是隐函数的一种显式表达，它描述球面在 $xOy$ 平面以上的部分。如果需要描述整个球面，还需要 $xOy$ 平面以下的部分： $$ z=-\\sqrt{ r^{2}-x^{2}-y^{2} } $$ 也就是说显化的隐函数可能无法覆盖所有满足隐函数方程的解集，因为显函数是一一映射，而隐函数可能是一对多或者多对多的映射。 在计算机图形学中，SDF 就是一种常用的可以描述表面的隐函数表达：\n$$ \\phi(\\mathbf{x})=\\pm \\text{dist}(\\mathbf{x},\\partial \\Omega) $$ SDF 以物体表面为界，空间中任意一点 $\\mathbf{x}$ 的 SDF 函数值为与物体表面的带符号距离（物体内部为负、外部为正）。自然的，物体表面可以用 SDF 值为零的水平集描述： $$ \\{\\mathbf{x}\\,|\\,\\phi(\\mathbf{x})=0\\} $$ ![使用 SDF 的零水平集描述表面，Jeong et.al](https://raw.gitmirror.com/congyuxiaoyoudao/Picgo-ImageBed/main/TA-interludes/Interlude%205.PoissonRecon/202508201058142.png#center) 0x02 泊松方程 Poisson Equation 泊松表面重建其实不需要对泊松方程有什么很深刻的数学物理了解，笔者也非相关专业，所以就仅凭自己的想法写一点更为直观的解释\n泊松方程由法国数学家泊松在对势的拉普拉斯方程作二阶修正时提出，今天更为人熟知的一般形式如下：\n$$ \\nabla^{2}\\phi=-f,\\;\\phi:\\Omega\\to \\mathbb{R} $$ 其中： $\\phi$ 为定义在空间 $\\Omega$ 上描述标量场（如温度、电势）的未知函数 $\\nabla^{2}$ 为拉普拉斯算子（也可以表示为 $\\Delta$），表示对函数在空间 $\\Omega$ 内的二阶导数求和，该算子相当于梯度的散度 $\\nabla^{2}=\\nabla \\cdot \\nabla$ $f$ 为一个已知函数，描述场量的分布（如热源强度、电荷密度），称为源项 总体来说泊松方程描述的是有源情况下源项如何影响场量的分布（热源影响温度、电荷密度影响电势），而求解泊松方程，就是在给定源项 $f$ 的条件下找到满足等式的 $\\phi$。\n为了获得期望的解，需要给定一个边界条件 $\\phi|_{\\partial\\Omega}$，其描述了场量函数 $\\phi$ 在空间 $\\Omega$ 内由于某种条件约束而产生的边界 $\\partial \\Omega$，通常有两类边界条件：\nDirichlet （狄利克雷）边界：$\\phi|{\\partial \\Omega}=g$，边界的场量已知，比如边界温度已知，边界满足：$\\forall p \\in \\partial \\Omega,;\\phi|{\\partial \\Omega}(p)=g(p)$ Neumann （纽曼）边界：$\\frac{\\partial\\phi}{\\partial n}|{\\partial \\Omega}=h$，边界上沿法向的净流出量已知，比如边界热通量已知，边界满足：$\\forall p \\in \\partial \\Omega,;\\frac{\\partial\\phi}{\\partial n}|{\\partial \\Omega}(p)=h(p)$ 从更加数学物理的角度看，泊松方程可以对应一个能量泛函：\n$$ E[\\phi]=\\frac{1}{2} \\int_{\\Omega}|\\nabla\\phi|^{2}d\\Omega-\\int_{\\Omega}f\\phi d\\Omega $$ 求解泊松方程相当于让泛函 $E[\\phi]$ 对任意小变动 $\\delta{\\phi}$ 的一阶变分为零，计算一阶变分可以得到： $$ \\delta E=\\int_{\\Omega}(-\\Delta\\phi-f)d\\Omega $$ 所以 $-\\Delta \\phi-f=0 \\Leftrightarrow \\nabla^{2}\\phi=-f$，这就将泊松方程的解和能量泛函存在极小值联系起来，求解泊松方程就是求解有源情况下能量的局部极小稳定态。 0x03 泊松表面重建 Poisson Surface Reconstruction 泊松表面重建（Poisson Surface Reconstruction）是一种隐式表面重建方法，对于重建任务，给定待重建物体 $M$，目标是获取其边界 $\\partial M$。输入有向点云（有法向的点集）$S$，可以将 $\\forall s \\in S$ 视为在真实表面 $\\partial M$ 上的均匀采样，每个采样点必须包含 $p$（坐标）和 $\\vec{N}$（指向物体内侧的法向）两个属性。定义指示函数 $\\chi_{M}:\\mathbb{R}^{3}\\to{0,1}$，描述物体 $M$ 在整个空间中的占用情况，在物体内部指示函数值为 1，否则为 0。 只要能解出这个指示函数，获取边界 $\\partial M$ 也就近在咫尺了。\n那么如何求解这个 $\\chi_{M}$ 呢？我们注意到指示函数在物体表面法向上的不连续性，在这个前提下考虑指示函数的梯度 $\\nabla \\chi_{M}$：\n物体内部 $\\chi_{M}\\equiv1$，所以 $\\nabla \\chi_{M}=0$ 物体外部 $\\chi_{M}\\equiv 0$，所以 $\\nabla \\chi_{M}=0$ 物体表面，$\\chi_{M}$ 从 1 突变到 0，$\\nabla \\chi_{M}$ 的方向为指向物体内部的法线方向，值为无穷大 理想情况下 $\\nabla \\chi_{M}$ 只在 $\\partial M$ 上非零，并且方向与输入点云 $S$ 的法向一致，即在表面附近的采样位置 $s.p$ 上有 $\\nabla \\chi_{M}\\approx\\vec{N}$。为了让指示函数可微以使梯度有意义，我们需要对指示函数梯度场进行平滑，由高斯散度定理，平滑后的 $\\nabla\\tilde{\\chi}_{M}$ 等于平滑表面法向得到的向量场：\n$$ \\nabla(\\chi_{M}\\,*\\,\\tilde{F})(q_{0})=\\int_{\\partial M}\\tilde{F}_{p}(q_{0})\\vec{N}_{\\partial M}(p)dp $$ 其中 $\\tilde{F}$ 为平滑函数，$*$ 为卷积算符，$q$ 为梯度算子作用的求导变量，$q_{0}$ 为当前评估梯度的位置，$p$ 为积分变量。 由于采样得到的样本点的离散性，无法获得物体表面每点 $p$ 附近的法向，因此将积分转为离散求和，定义 $\\mathscr{P}{s} \\subset \\partial M$ 为样本点 $s$ 附近的邻域表面，$|\\mathscr{P}{s}|$ 为其面积，且 $\\mathscr{P}{s{i}}\\cap\\mathscr{P}{s{j}}=\\varnothing,;\\cup_{s\\in S}\\mathscr{P}{s}=\\partial M$，也即 ${\\mathscr{P}{s_{1}},\\mathscr{P}{s{2}},\\dots,\\mathscr{P}{s{n}}}$ 为在 $\\partial M$ 上的一个划分。离散化后的平滑操作为：\n$$ \\begin{aligned} \\nabla(\\chi_{M}*\\tilde{F})(q)\u0026= \\sum_{s \\in S}\\int_{\\mathscr{P}_{s}}\\tilde{F}_{p}(q)\\vec{N}_{\\partial M}(p)dp\\\\ \u0026\\approx \\sum_{s\\in S}|\\mathscr{P}_{s}|\\tilde{F}_{s.p}(q)s.\\vec{N}\\equiv\\vec{V}(q) \\end{aligned} $$ 向量场 $\\vec{V}$ 为平滑后的指示函数梯度，可以通过平滑表面法向得到。所以最终的问题转化为求解： $$ \\nabla \\tilde{\\chi}_{M}=\\vec{V} $$ 直接求解上式需要积分，但 $\\vec{V}$ 往往不可积（比如不一定是无旋场），所以通常不存在精确解。那么就退而求其次，使用最小二乘法求近似解，寻找一个标量场 $\\phi$，使其梯度 $\\nabla \\phi$ 为对向量场 $\\vec{V}$ 的最佳逼近： $$ E(\\phi)=\\min_{\\phi}\\int||\\nabla \\phi-\\vec{V}||^{2}d\\Omega $$ 由变分法可证，取最小值时满足泊松方程： $$ \\Delta\\tilde{\\chi}_{M}=\\nabla \\cdot \\vec{V} $$ 同样的，由于 $\\chi_{M}$ 的离散性质（只在物体内部为 1，其余为 0），在连续空间中无法解析表达，所以考虑使用一系列基函数的线性组合近似表示： $$ \\chi_{M}=\\sum_{i}^n c_{i}F_{i} $$ 为此，必须选取合适的基函数以及其所在的函数空间，一个简单的想法是使用 3D 网格，然而这种均匀的体素结构在需要高分辨率的重建任务中需要的函数维度随立方增长，但重建的表面三角形数量却只是平方增长。由于 $\\tilde{\\chi}_{M}$ 仅在表面 $\\partial M$ 附近有值，所以可以考虑一些更为稀疏的表示，自适应八叉树就是一种不错的选择，在 $\\partial M$ 附近相对于其它位置深度更深。 定义一棵自适应八叉树 $\\mathscr{O}$，其中每个节点 $o\\in \\mathscr{O}$ 都含有一个函数 $F_{o}$，用这棵八叉树和这些函数来离散化拟合 $\\vec{V},\\chi_{M}$。\n八叉树与基函数 Octree and Basis 在采样点集 $S$ 上，给定最大的八叉树深度 $D$，可以定义一棵最小八叉树，使每个采样点 $s$ 落在某个节点内。\n接下来，定义一个固定的、积分为 1 的基函数 $F$，再为每个节点 $o$ 定义经过该节点平移和缩放（即以节点中心为原点，按节点大小缩放）的节点函数 $F_{o}$：\n$$ F_{o}(q)\\equiv F\\left( \\frac{q-o.c}{o.w} \\right) \\frac{1}{{o.w}^{3}} $$ 其中 $o.c,o.w$ 分别为节点 $o$ 的中心位置和宽度。由这些节点函数张成的函数空间 $\\mathscr{F}_{\\mathscr{O},F}\\equiv \\text{Span}\\{F_{o}\\}$ 在表达上具有和传统小波的多尺度分辨率特性，在深层节点上拥有高频的函数表达，这些表达在离表面 $\\partial M$ 越近时越精确。 为了更有效率地表示向量场 $\\vec{V}$，可以把每个采样点的位置替换为其所在叶节点的中心位置，这样每个叶节点 $o$ 只对应一个固定的节点函数 $F_{o}$，每个采样点只对其所在叶节点的节点函数的系数有贡献。通过缩放定义域，可以把 $\\tilde{F}$ 定义在一个固定的参考域内（比如 $[-1,1]$），而不需要考虑实际的节点尺度。\n$$ F(q)=\\tilde{F}\\left( \\frac{q}{2^{D}} \\right) $$ 八叉树最大深度 $D$ 对应采样宽度 $2^{-D}$，平滑函数必须近似一个方差数量级为 $2^{-D}$ 的高斯函数（避免过度平滑或数值不稳定），因此 $F$ 应该近似一个单位方差的的高斯函数。论文中作者使用了一个紧支函数（support 有界）来近似： $$ F(x,y,z)\\equiv(B(x)B(y)B(z))^{*n} \\; \\text{with}\\;B(t)= \\begin{cases} 1 \u0026 |t|\u003c0.5\\\\ 0 \u0026 \\text{otherwise} \\end{cases} $$ 实际上就是盒式滤波做 $n$ 次自卷积，随着 $n$ 增大，$F$ 越来越接近高斯函数并且其 support 范围增加，下图给出了一维情况下盒式滤波函数做 $n$（1-4）次自卷积的形状： 作者最终选择了 $n=3$，此时函数 $F$ 在域 $[-1.5,1.5]^{3}$ 内有 support，对于八叉树的任意一个节点，其节点函数 $F_{o}$ 的 support 最多跨越 $x,y,z$ 三个主轴正负方向各两个邻居节点（$-1.5\\leq\\frac{q-o.c}{o.w}\\leq 1.5\\Leftrightarrow q\\in[o.c-1.5\\cdot o.w,o.c+1.5\\cdot o.w]$），即最多有 $5^{3}-1=124$ 个同深度的其它节点的 support 与之重叠，这使得求解散度和拉普拉斯具备了稀疏性。\n重写向量场 Vector Field Definition 以上提到的将采样点位置钳制到其所在叶节点的中心位置的方法，显然这样的钳制会造成误差，作者后来使用三线性插值，对与当前采样点 $s$ 最近的八个节点的节点函数值进行插值作为当前采样点的值，最终向量场 $\\vec{V}$ 可以写成所有采样点的和：\n$$ \\vec{V}(q)\\equiv \\sum_{s\\in S}\\sum_{o\\in\\text{Ngbr}_{D}(s)}\\alpha_{o,s}F_{o}(q)s.\\vec{N} $$ 其中，$\\text{Ngbr}_{D}(s)$ 为距离当前采样点位置 $s.p$ 最近的八个节点集合，$\\alpha_{o,s}$ 为节点 $o$ 的三线性插值权重。由于先前的假设基于采样点分布均匀，因此每个 $\\mathscr{P}_{s}$ 的面积 $|\\mathscr{P}_{s}|$ 可以视为常数，总体和平滑后的指示函数梯度只差了个缩放系数，不影响重建质量。 但在采样点分布非均匀的情况下，$|\\mathscr{P}_{s}|$ 不能视为常数，此时可以根据采样密度自适应的调节每个点的贡献以及核函数宽度，为此首先需要估计一个密度场，并指定 $\\hat{D}\\leq D$ 为用于估计密度场的八叉树深度：\n$$ W_{\\hat{D}}(q)\\equiv\\sum_{s\\in S}\\sum_{o\\in\\text{Ngbr}_{\\hat{D}}(s)}\\alpha_{o,s}F_{o}(q) $$ 这种情况下，使用密度场的倒数估计 $|\\mathscr{P}_{s}|$： $$ \\vec{V}(q)\\equiv \\sum_{s\\in S} \\frac{1}{W_{\\hat{D}}(s.p)}\\sum_{o\\in\\text{Ngbr}_{\\text{Depth}(s.p)}(s)}\\alpha_{o,s}F_{o}(q)s.\\vec{N} $$ 其中，$\\text{Depth}(s.p)(s)$ 代表样本点 $s$ 期望的八叉树深度，通过衡量当前位置的采样密度和平均采样密度 $W$ 并设置： $$ \\text{Depth}(s.p)=\\min(D,D+\\log_{4}(W_{\\hat{D}}(s.p)/W) $$ 当 $W_{\\hat{D}}(s.p)\u003eW$，即局部密度大于全局密度时，使用最大的八叉树深度（最高精度），保证细粒度的重建；反之，当 $W_{\\hat{D}}(s.p)","wordCount":"467","inLanguage":"zh","datePublished":"2025-08-19T00:00:00Z","dateModified":"2025-08-19T00:00:00Z","author":{"@type":"Person","name":"The Only Problem"},"mainEntityOfPage":{"@type":"WebPage","@id":"https://congyuxiaoyoudao.github.io/posts/interludes/poisson-reconstruction/"},"publisher":{"@type":"Organization","name":"The Only Problem's Blog","logo":{"@type":"ImageObject","url":"https://congyuxiaoyoudao.github.io/favicon.ico"}}}</script></head><body id=top><script>localStorage.getItem("pref-theme")==="dark"?document.body.classList.add("dark"):localStorage.getItem("pref-theme")==="light"?document.body.classList.remove("dark"):window.matchMedia("(prefers-color-scheme: dark)").matches&&document.body.classList.add("dark")</script><header class=header><nav class=nav><div class=logo><a href=https://congyuxiaoyoudao.github.io/ accesskey=h title="The Only Problem's Blog (Alt + H)">The Only Problem's Blog</a><div class=logo-switches><button id=theme-toggle accesskey=t title="(Alt + T)" aria-label="Toggle theme">
+<svg id="moon" width="24" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+<svg id="sun" width="24" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg></button></div></div><ul id=menu><li><a href=https://congyuxiaoyoudao.github.io/archives/ title=Archive><span>Archive</span></a></li><li><a href=https://congyuxiaoyoudao.github.io/search/ title="Search (Alt + /)" accesskey=/><span>Search</span></a></li><li><a href=https://congyuxiaoyoudao.github.io/tags/ title=Tags><span>Tags</span></a></li><li><a href=https://congyuxiaoyoudao.github.io/about/ title=About><span>About</span></a></li></ul></nav></header><main class=main><article class=post-single><header class=post-header><div class=breadcrumbs><a href=https://congyuxiaoyoudao.github.io/>主页</a>&nbsp;»&nbsp;<a href=https://congyuxiaoyoudao.github.io/posts/>Posts</a>&nbsp;»&nbsp;<a href=https://congyuxiaoyoudao.github.io/posts/interludes/>Interludes</a></div><h1 class="post-title entry-hint-parent">Interlude 5. Poisson Reconstruction</h1><div class=post-meta><span title='2025-08-19 00:00:00 +0000 UTC'>八月 19, 2025</span>&nbsp;·&nbsp;3 分钟&nbsp;·&nbsp;The Only Problem</div></header><div class=toc><details><summary accesskey=c title="(Alt + C)"><span class=details>目录</span></summary><div class=inner><ul><li><a href=#0x00-to-begin-with aria-label="0x00 To begin with">0x00 To begin with</a></li><li><a href=#0x01-%e9%9a%90%e5%87%bd%e6%95%b0%e8%a1%a8%e8%be%be-implicit-expression aria-label="0x01 隐函数表达 Implicit Expression">0x01 隐函数表达 Implicit Expression</a></li><li><a href=#0x02-%e6%b3%8a%e6%9d%be%e6%96%b9%e7%a8%8b-poisson-equation aria-label="0x02 泊松方程 Poisson Equation">0x02 泊松方程 Poisson Equation</a></li><li><a href=#0x03--%e6%b3%8a%e6%9d%be%e8%a1%a8%e9%9d%a2%e9%87%8d%e5%bb%ba-poisson-surface-reconstruction aria-label="0x03  泊松表面重建 Poisson Surface Reconstruction">0x03 泊松表面重建 Poisson Surface Reconstruction</a><ul><li><a href=#%e5%85%ab%e5%8f%89%e6%a0%91%e4%b8%8e%e5%9f%ba%e5%87%bd%e6%95%b0-octree-and-basis aria-label="八叉树与基函数 Octree and Basis">八叉树与基函数 Octree and Basis</a></li><li><a href=#%e9%87%8d%e5%86%99%e5%90%91%e9%87%8f%e5%9c%ba-vector-field-definition aria-label="重写向量场 Vector Field Definition">重写向量场 Vector Field Definition</a></li><li><a href=#%e6%b1%82%e8%a7%a3%e6%b3%8a%e6%9d%be%e6%96%b9%e7%a8%8b-poisson-solution aria-label="求解泊松方程 Poisson Solution">求解泊松方程 Poisson Solution</a></li><li><a href=#%e7%ad%89%e5%80%bc%e9%9d%a2%e6%8f%90%e5%8f%96-isosurface-extraction aria-label="等值面提取 Isosurface Extraction">等值面提取 Isosurface Extraction</a></li></ul></li><li><a href=#0x04-afterwords aria-label="0x04 Afterwords">0x04 Afterwords</a></li></ul></div></details></div><div class=post-content><hr><h2 id=0x00-to-begin-with>0x00 To begin with<a hidden class=anchor aria-hidden=true href=#0x00-to-begin-with>#</a></h2><p>这篇文章将会包含以下内容：</p><ul><li><input checked disabled type=checkbox> 泊松重建的一些前置数学知识</li><li><input checked disabled type=checkbox> 泊松重建算法原理及推导过程</li></ul><p><strong>For reference</strong>：</p><ul><li>📺
+<a href="https://www.youtube.com/watch?v=nmvs0vrBT18">Laplace&rsquo;s Equation and Poisson&rsquo;s Equation</a></li><li>📖
+<a href=https://www.zhihu.com/question/25481998>如何通俗地理解拉普拉斯方程、泊松方程、亥姆霍兹方程？</a></li><li>📖
+<a href=https://zhuanlan.zhihu.com/p/107653198>泊松表面重建详解</a></li><li>📃
+<a href=https://hhoppe.com/poissonrecon.pdf>Poisson Surface Reconstruction</a></li></ul><hr><h2 id=0x01-隐函数表达-implicit-expression>0x01 隐函数表达 Implicit Expression<a hidden class=anchor aria-hidden=true href=#0x01-隐函数表达-implicit-expression>#</a></h2><p>表达一个三维曲面，例如球心位于原点、半径为 $r$ 的球面，可以使用球的标准方程：</p><div>$$
+F(x,y,z):x^{2}+y^{2}+z^{2}-r^{2}=0
+$$</div>该方程（形如 $F(x,y,z)=0$）就定义了球面的隐函数表达，它将所有变量都放在等式一侧，隐含了因变量关于自变量的函数关系，在描述球面的情况下，$z$ 关于 $x,y$ 的关系可以显化为：<div>$$
+z=\sqrt{ r^{2}-x^{2}-y^{2} }
+$$</div>这就是隐函数的一种显式表达，它描述球面在 $xOy$ 平面以上的部分。如果需要描述整个球面，还需要 $xOy$ 平面以下的部分：<div>$$
+z=-\sqrt{ r^{2}-x^{2}-y^{2} }
+$$</div>也就是说显化的隐函数可能无法覆盖所有满足隐函数方程的解集，因为显函数是一一映射，而隐函数可能是一对多或者多对多的映射。<p>在计算机图形学中，SDF 就是一种常用的可以描述表面的隐函数表达：</p><div>$$
+\phi(\mathbf{x})=\pm \text{dist}(\mathbf{x},\partial \Omega)
+$$</div>SDF 以物体表面为界，空间中任意一点 $\mathbf{x}$ 的 SDF 函数值为与物体表面的带符号距离（物体内部为负、外部为正）。自然的，物体表面可以用 SDF 值为零的水平集描述：<div>$$
+\{\mathbf{x}\,|\,\phi(\mathbf{x})=0\}
+$$</div>![使用 SDF 的零水平集描述表面，Jeong et.al](https://raw.gitmirror.com/congyuxiaoyoudao/Picgo-ImageBed/main/TA-interludes/Interlude%205.PoissonRecon/202508201058142.png#center)<hr><h2 id=0x02-泊松方程-poisson-equation>0x02 泊松方程 Poisson Equation<a hidden class=anchor aria-hidden=true href=#0x02-泊松方程-poisson-equation>#</a></h2><blockquote><p>泊松表面重建其实不需要对泊松方程有什么很深刻的数学物理了解，笔者也非相关专业，所以就仅凭自己的想法写一点更为直观的解释</p></blockquote><p>泊松方程由法国数学家泊松在对势的拉普拉斯方程作二阶修正时提出，今天更为人熟知的一般形式如下：</p><div>$$
+\nabla^{2}\phi=-f,\;\phi:\Omega\to \mathbb{R}
+$$</div>其中：<ul><li>$\phi$ 为定义在空间 $\Omega$ 上描述标量场（如温度、电势）的未知函数</li><li>$\nabla^{2}$ 为拉普拉斯算子（也可以表示为 $\Delta$），表示对函数在空间 $\Omega$ 内的二阶导数求和，该算子相当于梯度的散度 $\nabla^{2}=\nabla \cdot \nabla$</li><li>$f$ 为一个已知函数，描述场量的分布（如热源强度、电荷密度），称为源项</li></ul><p>总体来说泊松方程描述的是有源情况下源项如何影响场量的分布（热源影响温度、电荷密度影响电势），而求解泊松方程，就是在给定源项 $f$ 的条件下找到满足等式的 $\phi$。</p><p>为了获得期望的解，需要给定一个边界条件 $\phi|_{\partial\Omega}$，其描述了场量函数 $\phi$ 在空间 $\Omega$ 内由于某种条件约束而产生的边界 $\partial \Omega$，通常有两类边界条件：</p><ul><li>Dirichlet （狄利克雷）边界：$\phi|<em>{\partial \Omega}=g$，边界的场量已知，比如边界温度已知，边界满足：$\forall p \in \partial \Omega,;\phi|</em>{\partial \Omega}(p)=g(p)$</li><li>Neumann （纽曼）边界：$\frac{\partial\phi}{\partial n}|<em>{\partial \Omega}=h$，边界上沿法向的净流出量已知，比如边界热通量已知，边界满足：$\forall p \in \partial \Omega,;\frac{\partial\phi}{\partial n}|</em>{\partial \Omega}(p)=h(p)$</li></ul><p><img loading=lazy src=https://raw.gitmirror.com/congyuxiaoyoudao/Picgo-ImageBed/main/TA-interludes/Interlude%205.PoissonRecon/202508192032458.png#center></p><p>从更加数学物理的角度看，泊松方程可以对应一个能量泛函：</p><div>$$
+E[\phi]=\frac{1}{2} \int_{\Omega}|\nabla\phi|^{2}d\Omega-\int_{\Omega}f\phi d\Omega
+$$</div>求解泊松方程相当于让泛函 $E[\phi]$ 对任意小变动 $\delta{\phi}$ 的一阶变分为零，计算一阶变分可以得到：<div>$$
+\delta E=\int_{\Omega}(-\Delta\phi-f)d\Omega
+$$</div>所以 $-\Delta \phi-f=0 \Leftrightarrow \nabla^{2}\phi=-f$，这就将泊松方程的解和能量泛函存在极小值联系起来，求解泊松方程就是求解有源情况下能量的局部极小稳定态。<hr><h2 id=0x03--泊松表面重建-poisson-surface-reconstruction>0x03 泊松表面重建 Poisson Surface Reconstruction<a hidden class=anchor aria-hidden=true href=#0x03--泊松表面重建-poisson-surface-reconstruction>#</a></h2><p>泊松表面重建（Poisson Surface Reconstruction）是一种隐式表面重建方法，对于重建任务，给定待重建物体 $M$，目标是获取其边界 $\partial M$。输入有向点云（有法向的点集）$S$，可以将 $\forall s \in S$ 视为在真实表面 $\partial M$ 上的均匀采样，每个采样点必须包含 $p$（坐标）和 $\vec{N}$（指向物体内侧的法向）两个属性。定义指示函数 $\chi_{M}:\mathbb{R}^{3}\to{0,1}$，描述物体 $M$ 在整个空间中的占用情况，在物体内部指示函数值为 1，否则为 0。 只要能解出这个指示函数，获取边界 $\partial M$ 也就近在咫尺了。</p><p><img alt="二维泊松重建直观流程，Kazhdan et.al" loading=lazy src=https://raw.gitmirror.com/congyuxiaoyoudao/Picgo-ImageBed/main/TA-interludes/Interlude%205.PoissonRecon/202508191520584.png#center></p><p>那么如何求解这个 $\chi_{M}$ 呢？我们注意到指示函数在物体表面法向上的不连续性，在这个前提下考虑指示函数的梯度 $\nabla \chi_{M}$：</p><ol><li>物体内部 $\chi_{M}\equiv1$，所以 $\nabla \chi_{M}=0$</li><li>物体外部 $\chi_{M}\equiv 0$，所以 $\nabla \chi_{M}=0$</li><li>物体表面，$\chi_{M}$ 从 1 突变到 0，$\nabla \chi_{M}$ 的方向为指向物体内部的法线方向，值为无穷大</li></ol><p>理想情况下 $\nabla \chi_{M}$ 只在 $\partial M$ 上非零，并且方向与输入点云 $S$ 的法向一致，即在表面附近的采样位置 $s.p$ 上有 $\nabla \chi_{M}\approx\vec{N}$。为了让指示函数可微以使梯度有意义，我们需要对指示函数梯度场进行平滑，由高斯散度定理，平滑后的 $\nabla\tilde{\chi}_{M}$ 等于平滑表面法向得到的向量场：</p><div>$$
+\nabla(\chi_{M}\,*\,\tilde{F})(q_{0})=\int_{\partial M}\tilde{F}_{p}(q_{0})\vec{N}_{\partial M}(p)dp
+$$</div>其中 $\tilde{F}$ 为平滑函数，$*$ 为卷积算符，$q$ 为梯度算子作用的求导变量，$q_{0}$ 为当前评估梯度的位置，$p$ 为积分变量。<p>由于采样得到的样本点的离散性，无法获得物体表面每点 $p$ 附近的法向，因此将积分转为离散求和，定义 $\mathscr{P}<em>{s} \subset \partial M$ 为样本点 $s$ 附近的邻域表面，$|\mathscr{P}</em>{s}|$ 为其面积，且 $\mathscr{P}<em>{s</em>{i}}\cap\mathscr{P}<em>{s</em>{j}}=\varnothing,;\cup_{s\in S}\mathscr{P}<em>{s}=\partial M$，也即 ${\mathscr{P}</em>{s_{1}},\mathscr{P}<em>{s</em>{2}},\dots,\mathscr{P}<em>{s</em>{n}}}$ 为在 $\partial M$ 上的一个划分。离散化后的平滑操作为：</p><div>$$
+\begin{aligned}
+\nabla(\chi_{M}*\tilde{F})(q)&= \sum_{s \in S}\int_{\mathscr{P}_{s}}\tilde{F}_{p}(q)\vec{N}_{\partial M}(p)dp\\
+&\approx \sum_{s\in S}|\mathscr{P}_{s}|\tilde{F}_{s.p}(q)s.\vec{N}\equiv\vec{V}(q)
+\end{aligned}
+$$</div>向量场 $\vec{V}$ 为平滑后的指示函数梯度，可以通过平滑表面法向得到。所以最终的问题转化为求解：<div>$$
+\nabla \tilde{\chi}_{M}=\vec{V}
+$$</div>直接求解上式需要积分，但 $\vec{V}$ 往往不可积（比如不一定是无旋场），所以通常不存在精确解。那么就退而求其次，使用最小二乘法求近似解，寻找一个标量场 $\phi$，使其梯度 $\nabla \phi$ 为对向量场 $\vec{V}$ 的最佳逼近：<div>$$
+E(\phi)=\min_{\phi}\int||\nabla \phi-\vec{V}||^{2}d\Omega
+$$</div>由变分法可证，取最小值时满足泊松方程：<div>$$
+\Delta\tilde{\chi}_{M}=\nabla \cdot \vec{V}
+$$</div>同样的，由于 $\chi_{M}$ 的离散性质（只在物体内部为 1，其余为 0），在连续空间中无法解析表达，所以考虑使用一系列基函数的线性组合近似表示：<div>$$
+\chi_{M}=\sum_{i}^n c_{i}F_{i}
+$$</div>为此，必须选取合适的基函数以及其所在的函数空间，一个简单的想法是使用 3D 网格，然而这种均匀的体素结构在需要高分辨率的重建任务中需要的函数维度随立方增长，但重建的表面三角形数量却只是平方增长。由于 $\tilde{\chi}_{M}$ 仅在表面 $\partial M$ 附近有值，所以可以考虑一些更为稀疏的表示，自适应八叉树就是一种不错的选择，在 $\partial M$ 附近相对于其它位置深度更深。<p>定义一棵自适应八叉树 $\mathscr{O}$，其中每个节点 $o\in \mathscr{O}$ 都含有一个函数 $F_{o}$，用这棵八叉树和这些函数来离散化拟合 $\vec{V},\chi_{M}$。</p><h3 id=八叉树与基函数-octree-and-basis>八叉树与基函数 Octree and Basis<a hidden class=anchor aria-hidden=true href=#八叉树与基函数-octree-and-basis>#</a></h3><p>在采样点集 $S$ 上，给定最大的八叉树深度 $D$，可以定义一棵最小八叉树，使每个采样点 $s$ 落在某个节点内。</p><p>接下来，定义一个固定的、积分为 1 的基函数 $F$，再为每个节点 $o$ 定义经过该节点平移和缩放（即以节点中心为原点，按节点大小缩放）的节点函数 $F_{o}$：</p><div>$$
+F_{o}(q)\equiv F\left( \frac{q-o.c}{o.w} \right) \frac{1}{{o.w}^{3}}
+$$</div>其中 $o.c,o.w$ 分别为节点 $o$ 的中心位置和宽度。由这些节点函数张成的函数空间 $\mathscr{F}_{\mathscr{O},F}\equiv \text{Span}\{F_{o}\}$ 在表达上具有和传统小波的多尺度分辨率特性，在深层节点上拥有高频的函数表达，这些表达在离表面 $\partial M$ 越近时越精确。<p>为了更有效率地表示向量场 $\vec{V}$，可以把每个采样点的位置替换为其所在叶节点的中心位置，这样每个叶节点 $o$ 只对应一个固定的节点函数 $F_{o}$，每个采样点只对其所在叶节点的节点函数的系数有贡献。通过缩放定义域，可以把 $\tilde{F}$ 定义在一个固定的参考域内（比如 $[-1,1]$），而不需要考虑实际的节点尺度。</p><div>$$
+F(q)=\tilde{F}\left( \frac{q}{2^{D}} \right)
+$$</div>八叉树最大深度 $D$ 对应采样宽度 $2^{-D}$，平滑函数必须近似一个方差数量级为 $2^{-D}$ 的高斯函数（避免过度平滑或数值不稳定），因此 $F$ 应该近似一个单位方差的的高斯函数。论文中作者使用了一个紧支函数（support 有界）来近似：<div>$$
+F(x,y,z)\equiv(B(x)B(y)B(z))^{*n} \; \text{with}\;B(t)=
+\begin{cases}
+1 & |t|<0.5\\
+0 & \text{otherwise}
+\end{cases}
+$$</div>实际上就是盒式滤波做 $n$ 次自卷积，随着 $n$ 增大，$F$ 越来越接近高斯函数并且其 support 范围增加，下图给出了一维情况下盒式滤波函数做 $n$（1-4）次自卷积的形状：<p><img loading=lazy src=https://raw.gitmirror.com/congyuxiaoyoudao/Picgo-ImageBed/main/TA-interludes/Interlude%205.PoissonRecon/202508221114856.png#center></p><p>作者最终选择了 $n=3$，此时函数 $F$ 在域 $[-1.5,1.5]^{3}$ 内有 support，对于八叉树的任意一个节点，其节点函数 $F_{o}$ 的 support 最多跨越 $x,y,z$ 三个主轴正负方向各两个邻居节点（$-1.5\leq\frac{q-o.c}{o.w}\leq 1.5\Leftrightarrow q\in[o.c-1.5\cdot o.w,o.c+1.5\cdot o.w]$），即最多有 $5^{3}-1=124$ 个同深度的其它节点的 support 与之重叠，这使得求解散度和拉普拉斯具备了稀疏性。</p><h3 id=重写向量场-vector-field-definition>重写向量场 Vector Field Definition<a hidden class=anchor aria-hidden=true href=#重写向量场-vector-field-definition>#</a></h3><p>以上提到的将采样点位置钳制到其所在叶节点的中心位置的方法，显然这样的钳制会造成误差，作者后来使用三线性插值，对与当前采样点 $s$ 最近的八个节点的节点函数值进行插值作为当前采样点的值，最终向量场 $\vec{V}$ 可以写成所有采样点的和：</p><div>$$
+\vec{V}(q)\equiv \sum_{s\in S}\sum_{o\in\text{Ngbr}_{D}(s)}\alpha_{o,s}F_{o}(q)s.\vec{N}
+$$</div>其中，$\text{Ngbr}_{D}(s)$ 为距离当前采样点位置 $s.p$ 最近的八个节点集合，$\alpha_{o,s}$ 为节点 $o$ 的三线性插值权重。由于先前的假设基于采样点分布均匀，因此每个 $\mathscr{P}_{s}$ 的面积 $|\mathscr{P}_{s}|$ 可以视为常数，总体和平滑后的指示函数梯度只差了个缩放系数，不影响重建质量。<p>但在采样点分布非均匀的情况下，$|\mathscr{P}_{s}|$ 不能视为常数，此时可以根据采样密度自适应的调节每个点的贡献以及核函数宽度，为此首先需要估计一个密度场，并指定 $\hat{D}\leq D$ 为用于估计密度场的八叉树深度：</p><div>$$
+W_{\hat{D}}(q)\equiv\sum_{s\in S}\sum_{o\in\text{Ngbr}_{\hat{D}}(s)}\alpha_{o,s}F_{o}(q)
+$$</div>这种情况下，使用密度场的倒数估计 $|\mathscr{P}_{s}|$：<div>$$
+\vec{V}(q)\equiv \sum_{s\in S} \frac{1}{W_{\hat{D}}(s.p)}\sum_{o\in\text{Ngbr}_{\text{Depth}(s.p)}(s)}\alpha_{o,s}F_{o}(q)s.\vec{N}
+$$</div>其中，$\text{Depth}(s.p)(s)$ 代表样本点 $s$ 期望的八叉树深度，通过衡量当前位置的采样密度和平均采样密度 $W$ 并设置：<div>$$
+\text{Depth}(s.p)=\min(D,D+\log_{4}(W_{\hat{D}}(s.p)/W)
+$$</div>当 $W_{\hat{D}}(s.p)>W$，即局部密度大于全局密度时，使用最大的八叉树深度（最高精度），保证细粒度的重建；反之，当 $W_{\hat{D}}(s.p)<w$ 时，即局部密度小于全局密度时，使用较小的八叉树深度（粒度较粗），保证解的平滑性。这样即可控制样本点 $s$ 对 $\vec{v}$ 的贡献与 $|\mathscr{p}_{s}|$ 成比例。 <h3 id=求解泊松方程-poisson-solution>求解泊松方程 Poisson Solution<a hidden class=anchor aria-hidden=true href=#求解泊松方程-poisson-solution>#</a></h3><p>定义了向量场 $\vec{V}$ 后，我们想要求解 $\tilde{\chi}\in\mathscr{F}<em>{\mathscr{O},F}$ 以使指示函数的梯度接近 $\vec{V}$，也即求解泊松方程 $\Delta \tilde{\chi}=\nabla\cdot \vec{V}$，但即便 $\tilde{\chi},\vec{V}$ 属于空间 $\mathscr{F}</em>{\mathscr{O},F}$，$\Delta \tilde{\chi},\nabla \cdot \vec{V}$ 却不一定如此。所以退而求其次，只要求 $\Delta \tilde{\chi}$ 在 $\mathscr{F}<em>{\mathscr{O},F}$ 上的投影接近于 $\nabla \cdot \vec{V}$ 在 $\mathscr{F}</em>{\mathscr{O},F}$ 上的投影，也就是解一个最小二乘问题：</p><div>$$
+\sum_{o \in \mathscr{O}} \left\| \left\langle \Delta\tilde{\chi} - \nabla\cdot\vec{V}, F_o \right\rangle \right\|^2 = \sum_{o \in \mathscr{O}} \left\| \left\langle \Delta\tilde{\chi}, F_o \right\rangle - \left\langle \nabla\cdot\vec{V}, F_o \right\rangle \right\|^2.
+$$</div>给定 $|\mathscr{O}|$ 维向量 $v$，其第 $o$ 维坐标 $v_{o}=\left\langle \nabla \cdot \vec{V},F_{o}\right\rangle$，目标为使 $\Delta \tilde{\chi}$ 在每个 $F_{o}$ 上投影组成的向量与 $v$ 尽可能接近。将指示函数写成向量形式 $\tilde{\chi}=\sum_{o}x_{o}F_{o}$，我们要解的就是这个系数向量 $x\in \mathbb{R}^{|\mathscr{O}|}$，然后定义一个 $|\mathscr{O}|\times|\mathscr{O}|$ 的矩阵 $L$，其中第 $(o,o')$ 位置的元素如下：<div>$$
+L_{o,o'}\equiv\left\langle \frac{\partial^{2}F_{o}}{\partial x^{2}},F_{o'}\right\rangle+\left\langle \frac{\partial^{2}F_{o}}{\partial y^{2}},F_{o'}\right\rangle+\left\langle \frac{\partial^{2}F_{o}}{\partial z^{2}},F_{o'}\right\rangle
+$$</div>求解 $\tilde{\chi}$ 就相当于求解：<div>$$
+\min_{x\in \mathbb{R}^{\mathscr{O}}}\Vert Lx-v\Vert^{2}
+$$</div>而矩阵可以写作：<div>$$
+\begin{aligned}
+L_{o,o'}=\left\langle \Delta F_{o},F_{o'}\right\rangle&=\int_{\mathbb{R}^{3}}\Delta F_{o}(q)F_{o'}(q)dq\\
+&=\int_{\mathbb{R}^{3}}F_{o}(q)\Delta F_{o'}(q)dq\\
+&=-\int_{\mathbb{R}^{3}}\nabla F_{o}(q)\nabla F_{o'}(q)dq
+\end{aligned}
+$$</div>显然是对称的，并且由于 $F_{o}$ 是紧支函数，$L$ 中大部分元素都为零，所以 $L$ 也是稀疏的，可以很好的加速求解。<h3 id=等值面提取-isosurface-extraction>等值面提取 Isosurface Extraction<a hidden class=anchor aria-hidden=true href=#等值面提取-isosurface-extraction>#</a></h3><p>为了获取重建表面 $\partial \tilde{M}$，首先需要选择一个合适的 isovalue，然后再从指示函数中提取等值面，作者使用了所有采样点位置的指示函数值的平均：</p><div>$$
+\partial \tilde{M}\equiv\{q\in \mathbb{R}^{3}|\tilde{\chi}(q)=\gamma\}\;\text{with}\;\gamma=\frac{1}{|S|}\sum_{s\in S}\tilde{\chi}(s.p)
+$$</div>在采样点分布非均匀的情况下，修改其为采样点位置的指示函数值的加权和：<div>$$
+\partial \tilde{M}\equiv\{q\in \mathbb{R}^{3}|\tilde{\chi}(q)=\gamma\}\;\text{with}\;\gamma=\frac{\sum \frac{1}{W_{\hat{D}}(s.p)}\tilde{\chi}(s.p)}{\sum \frac{1}{W_{\hat{D}}(s.p)}}
+$$</div>然后就可以使用 Marching Cubes 等方法提取等值面了。<hr><h2 id=0x04-afterwords>0x04 Afterwords<a hidden class=anchor aria-hidden=true href=#0x04-afterwords>#</a></h2><p>泊松重建的算法算是对从 3D 点云中重建水密表面的经典算法，奈何论文作者定义的数学符号比较花哨，对初学者（没错就是我）来说可能比较 “hard to follow”，后续也有许多工作对其进行了各种改进（比如 iPSR 将原始算法对输入点云的有向性依赖去除，以随机初始化的法线经过多次迭代就可重建出高质量表面），但对非水密点云（非闭合表面）的效果仍然没有很好的突破。</p></div><footer class=post-footer><ul class=post-tags><li><a href=https://congyuxiaoyoudao.github.io/tags/%E7%82%B9%E4%BA%91/>点云</a></li><li><a href=https://congyuxiaoyoudao.github.io/tags/%E4%B8%89%E7%BB%B4%E9%87%8D%E5%BB%BA/>三维重建</a></li></ul><nav class=paginav><a class=next href=https://congyuxiaoyoudao.github.io/posts/interludes/estimatenormals/><span class=title>下一页 »</span><br><span>Interlude 4. 在点云数据中估计法线</span></a></nav></footer><div id=tw-comment></div><script>const getStoredTheme=()=>localStorage.getItem("pref-theme")==="light"?"light":"noborder_dark",setGiscusTheme=()=>{const e=e=>{const t=document.querySelector("iframe.giscus-frame");t&&t.contentWindow.postMessage({giscus:e},"https://giscus.app")};e({setConfig:{theme:getStoredTheme()}})};document.addEventListener("DOMContentLoaded",()=>{const s={src:"https://giscus.app/client.js","data-repo":"congyuxiaoyoudao/congyuxiaoyoudao.github.io","data-repo-id":"","data-category":"Announcements","data-category-id":"","data-mapping":"pathname","data-strict":"0","data-reactions-enabled":"","data-emit-metadata":"","data-input-position":"","data-theme":getStoredTheme(),"data-lang":"zh-CN","data-loading":"lazy",crossorigin:"anonymous"},e=document.createElement("script");Object.entries(s).forEach(([t,n])=>e.setAttribute(t,n)),document.querySelector("#tw-comment").appendChild(e);const t=document.querySelector("#theme-toggle");t&&t.addEventListener("click",setGiscusTheme);const n=document.querySelector("#theme-toggle-float");n&&n.addEventListener("click",setGiscusTheme)})</script></article></main><footer class=footer><span>&copy; 2025 <a href=https://congyuxiaoyoudao.github.io/>The Only Problem's Blog</a></span> ·
+<span>Powered by
+<a href=https://gohugo.io/ rel="noopener noreferrer" target=_blank>Hugo</a> &
+<a href=https://github.com/adityatelange/hugo-PaperMod/ rel=noopener target=_blank>PaperMod</a></span></footer><a href=#top aria-label="go to top" title="Go to Top (Alt + G)" class=top-link id=top-link accesskey=g><svg viewBox="0 0 12 6" fill="currentColor"><path d="M12 6H0l6-6z"/></svg>
+</a><script>let menu=document.getElementById("menu");menu&&(menu.scrollLeft=localStorage.getItem("menu-scroll-position"),menu.onscroll=function(){localStorage.setItem("menu-scroll-position",menu.scrollLeft)}),document.querySelectorAll('a[href^="#"]').forEach(e=>{e.addEventListener("click",function(e){e.preventDefault();var t=this.getAttribute("href").substr(1);window.matchMedia("(prefers-reduced-motion: reduce)").matches?document.querySelector(`[id='${decodeURIComponent(t)}']`).scrollIntoView():document.querySelector(`[id='${decodeURIComponent(t)}']`).scrollIntoView({behavior:"smooth"}),t==="top"?history.replaceState(null,null," "):history.pushState(null,null,`#${t}`)})})</script><script>var mybutton=document.getElementById("top-link");window.onscroll=function(){document.body.scrollTop>800||document.documentElement.scrollTop>800?(mybutton.style.visibility="visible",mybutton.style.opacity="1"):(mybutton.style.visibility="hidden",mybutton.style.opacity="0")}</script><script>document.getElementById("theme-toggle").addEventListener("click",()=>{document.body.className.includes("dark")?(document.body.classList.remove("dark"),localStorage.setItem("pref-theme","light")):(document.body.classList.add("dark"),localStorage.setItem("pref-theme","dark"))})</script><script>document.querySelectorAll("pre > code").forEach(e=>{const n=e.parentNode.parentNode,t=document.createElement("button");t.classList.add("copy-code"),t.innerHTML="复制";function s(){t.innerHTML="已复制！",setTimeout(()=>{t.innerHTML="复制"},2e3)}t.addEventListener("click",t=>{if("clipboard"in navigator){navigator.clipboard.writeText(e.textContent),s();return}const n=document.createRange();n.selectNodeContents(e);const o=window.getSelection();o.removeAllRanges(),o.addRange(n);try{document.execCommand("copy"),s()}catch{}o.removeRange(n)}),n.classList.contains("highlight")?n.appendChild(t):n.parentNode.firstChild==n||(e.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName=="TABLE"?e.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(t):e.parentNode.appendChild(t))})</script></body></html>
