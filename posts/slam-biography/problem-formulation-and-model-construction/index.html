@@ -1,0 +1,167 @@
+<!doctype html><html lang=zh dir=auto><head><meta charset=utf-8><meta http-equiv=X-UA-Compatible content="IE=edge"><meta name=viewport content="width=device-width,initial-scale=1,shrink-to-fit=no"><meta name=robots content="index, follow"><title>SLAM Biography I · Problem Formulation and Model Construction | The Only Problem's Blog</title><meta name=keywords content="SLAM,非线性优化"><meta name=description content="
+本文及其所属的专栏是笔者阅读学习高翔博士视觉 SLAM 十四讲的产物，看书跑代码总是匆匆而过，写点笔记加深印象。本来的打算是按书的节奏依次为每章做总结，但最后觉得这样效率太低且不够连贯，还是凭自己的思路写下去。观前提示，这一部分偏向理论，不可避免地文字会比较多
+
+0x00 To begin with
+这篇文章将会包含以下内容：
+
+ 什么是 SLAM 问题
+ SLAM 问题的数学模型
+
+For reference：
+
+视觉 SLAM 十四讲视频课程：
+
+
+
+
+
+
+
+  
+  【高翔】视觉SLAM十四讲
+
+
+视觉 SLAM 十四讲配套代码仓库：
+
+
+
+
+
+
+
+  
+  gaoxiang12/slambook2: edition 2 of the slambook
+
+
+个人学习代码仓库：
+
+
+
+
+
+
+
+  
+  congyuxiaoyoudao/learn-slambook2: Learn Basic Knowledge on Visual SLAM: From Theory to Practice 2nd edition by Xiang Gao
+
+
+
+
+0x01 何为 SLAM？ What is SLAM
+
+认识任何一个事物或者技术总是可以从两个角度出发：它是什么以及它能做什么？
+SLAM，全称为 Simultaneous Localization and Mapping，翻译过来就是同步定位与建图。它要求携带传感器的主体（例如运动机器人），在环境信息未知的情况下，通过自身在环境中的运动同步估计运动过程并建立环境的模型。这样来看，SLAM 的核心问题有二：
+
+定位（Localization）：携带传感器的主体需要通过传感器感知环境信息判断自身的状态（位姿）；
+建图（Mapping）：主体基于自身连续轨迹上的观测数据，逐步建立环境地图；
+
+此外，这两个问题间还有一个实时性的要求，即 Simultaneous（同步），同步地完成定位与建图，而非先进行信息采集再将数据传送回去做全局的估计和优化（那样耗时和局限就比较大，也就没意义了）。
+在 SLAM 问题中，传感器作为运动主体感知环境的唯一途径，承担了从环境中获取观测数据的作用。传感器的不同意味着观测数据不同，也将 SLAM 问题分为不同类别，常见的如以相机为主要传感器的视觉 SLAM（Visual SLAM）和以激光雷达为主要传感器的激光 SLAM（LiDAR SLAM）等。在视觉 SLAM 的背景下，SLAM 问题就变成了从一系列连续图像中估计相机位姿，并基于图像特征等信息构建环境地图的过程。"><meta name=author content="The Only Problem"><link rel=canonical href=https://congyuxiaoyoudao.github.io/posts/slam-biography/problem-formulation-and-model-construction/><link crossorigin=anonymous href=/assets/css/stylesheet.b1ff178d943fda80c1fcb69480f9bb36eca1f806e6d0331d17ddf91a83b94b0f.css integrity="sha256-sf8XjZQ/2oDB/LaUgPm7Nuyh+Abm0DMdF935GoO5Sw8=" rel="preload stylesheet" as=style><link rel=icon href=https://congyuxiaoyoudao.github.io/favicon.ico><link rel=icon type=image/png sizes=16x16 href=https://congyuxiaoyoudao.github.io/favicon-16x16.png><link rel=icon type=image/png sizes=32x32 href=https://congyuxiaoyoudao.github.io/favicon-32x32.png><link rel=apple-touch-icon href=https://congyuxiaoyoudao.github.io/apple-touch-icon.png><link rel=mask-icon href=https://congyuxiaoyoudao.github.io/safari-pinned-tab.svg><meta name=theme-color content="#2e2e33"><meta name=msapplication-TileColor content="#2e2e33"><link rel=alternate hreflang=zh href=https://congyuxiaoyoudao.github.io/posts/slam-biography/problem-formulation-and-model-construction/><noscript><style>#theme-toggle,.top-link{display:none}</style><style>@media(prefers-color-scheme:dark){:root{--theme:rgb(29, 30, 32);--entry:rgb(46, 46, 51);--primary:rgb(218, 218, 219);--secondary:rgb(155, 156, 157);--tertiary:rgb(65, 66, 68);--content:rgb(196, 196, 197);--code-block-bg:rgb(46, 46, 51);--code-bg:rgb(55, 56, 62);--border:rgb(51, 51, 51)}.list{background:var(--theme)}.list:not(.dark)::-webkit-scrollbar-track{background:0 0}.list:not(.dark)::-webkit-scrollbar-thumb{border-color:var(--theme)}}</style></noscript><link rel=stylesheet href=https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/katex.min.css integrity=sha384-wcIxkf4k558AjM3Yz3BBFQUbk/zgIYC2R0QpeeYb+TwlBVMrlgLqwRjRtGZiK7ww crossorigin=anonymous><script defer src=https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/katex.min.js integrity=sha384-hIoBPJpTUs74ddyc4bFZSM1TVlQDA60VBbJS0oA934VSz82sBx1X7kSx2ATBDIyd crossorigin=anonymous></script><script defer src=https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/contrib/auto-render.min.js integrity=sha384-43gviWU0YVjaDtb/GhzOouOXtZMP/7XUzwPTstBeZFe/+rCMvRwr4yROQP43s0Xk crossorigin=anonymous onload='window.addEventListener("DOMContentLoaded",function(){renderMathInElement(document.body,{delimiters:[{left:"$$",right:"$$",display:!0},{left:"$",right:"$",display:!1},{left:"\\$$",right:"\\\\$$",display:!1},{left:"\\$$",right:"\\\\$$",display:!0}]})})'></script><link rel=preconnect href=https://fonts.googleapis.com><link rel=preconnect href=https://fonts.gstatic.com crossorigin><link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap" rel=stylesheet><link rel=stylesheet href=https://cdn.bootcdn.net/ajax/libs/lxgw-wenkai-screen-webfont/1.7.0/style.min.css><meta property="og:url" content="https://congyuxiaoyoudao.github.io/posts/slam-biography/problem-formulation-and-model-construction/"><meta property="og:site_name" content="The Only Problem's Blog"><meta property="og:title" content="SLAM Biography I · Problem Formulation and Model Construction"><meta property="og:description" content=" 本文及其所属的专栏是笔者阅读学习高翔博士视觉 SLAM 十四讲的产物，看书跑代码总是匆匆而过，写点笔记加深印象。本来的打算是按书的节奏依次为每章做总结，但最后觉得这样效率太低且不够连贯，还是凭自己的思路写下去。观前提示，这一部分偏向理论，不可避免地文字会比较多
+0x00 To begin with 这篇文章将会包含以下内容：
+什么是 SLAM 问题 SLAM 问题的数学模型 For reference：
+视觉 SLAM 十四讲视频课程： 【高翔】视觉SLAM十四讲 视觉 SLAM 十四讲配套代码仓库： gaoxiang12/slambook2: edition 2 of the slambook 个人学习代码仓库： congyuxiaoyoudao/learn-slambook2: Learn Basic Knowledge on Visual SLAM: From Theory to Practice 2nd edition by Xiang Gao 0x01 何为 SLAM？ What is SLAM 认识任何一个事物或者技术总是可以从两个角度出发：它是什么以及它能做什么？
+SLAM，全称为 Simultaneous Localization and Mapping，翻译过来就是同步定位与建图。它要求携带传感器的主体（例如运动机器人），在环境信息未知的情况下，通过自身在环境中的运动同步估计运动过程并建立环境的模型。这样来看，SLAM 的核心问题有二：
+定位（Localization）：携带传感器的主体需要通过传感器感知环境信息判断自身的状态（位姿）； 建图（Mapping）：主体基于自身连续轨迹上的观测数据，逐步建立环境地图； 此外，这两个问题间还有一个实时性的要求，即 Simultaneous（同步），同步地完成定位与建图，而非先进行信息采集再将数据传送回去做全局的估计和优化（那样耗时和局限就比较大，也就没意义了）。
+在 SLAM 问题中，传感器作为运动主体感知环境的唯一途径，承担了从环境中获取观测数据的作用。传感器的不同意味着观测数据不同，也将 SLAM 问题分为不同类别，常见的如以相机为主要传感器的视觉 SLAM（Visual SLAM）和以激光雷达为主要传感器的激光 SLAM（LiDAR SLAM）等。在视觉 SLAM 的背景下，SLAM 问题就变成了从一系列连续图像中估计相机位姿，并基于图像特征等信息构建环境地图的过程。"><meta property="og:locale" content="zh"><meta property="og:type" content="article"><meta property="article:section" content="posts"><meta property="article:published_time" content="2025-09-25T00:00:00+00:00"><meta property="article:modified_time" content="2025-09-25T00:00:00+00:00"><meta property="article:tag" content="SLAM"><meta property="article:tag" content="非线性优化"><meta name=twitter:card content="summary"><meta name=twitter:title content="SLAM Biography I · Problem Formulation and Model Construction"><meta name=twitter:description content="
+本文及其所属的专栏是笔者阅读学习高翔博士视觉 SLAM 十四讲的产物，看书跑代码总是匆匆而过，写点笔记加深印象。本来的打算是按书的节奏依次为每章做总结，但最后觉得这样效率太低且不够连贯，还是凭自己的思路写下去。观前提示，这一部分偏向理论，不可避免地文字会比较多
+
+0x00 To begin with
+这篇文章将会包含以下内容：
+
+ 什么是 SLAM 问题
+ SLAM 问题的数学模型
+
+For reference：
+
+视觉 SLAM 十四讲视频课程：
+
+
+
+
+
+
+
+  
+  【高翔】视觉SLAM十四讲
+
+
+视觉 SLAM 十四讲配套代码仓库：
+
+
+
+
+
+
+
+  
+  gaoxiang12/slambook2: edition 2 of the slambook
+
+
+个人学习代码仓库：
+
+
+
+
+
+
+
+  
+  congyuxiaoyoudao/learn-slambook2: Learn Basic Knowledge on Visual SLAM: From Theory to Practice 2nd edition by Xiang Gao
+
+
+
+
+0x01 何为 SLAM？ What is SLAM
+
+认识任何一个事物或者技术总是可以从两个角度出发：它是什么以及它能做什么？
+SLAM，全称为 Simultaneous Localization and Mapping，翻译过来就是同步定位与建图。它要求携带传感器的主体（例如运动机器人），在环境信息未知的情况下，通过自身在环境中的运动同步估计运动过程并建立环境的模型。这样来看，SLAM 的核心问题有二：
+
+定位（Localization）：携带传感器的主体需要通过传感器感知环境信息判断自身的状态（位姿）；
+建图（Mapping）：主体基于自身连续轨迹上的观测数据，逐步建立环境地图；
+
+此外，这两个问题间还有一个实时性的要求，即 Simultaneous（同步），同步地完成定位与建图，而非先进行信息采集再将数据传送回去做全局的估计和优化（那样耗时和局限就比较大，也就没意义了）。
+在 SLAM 问题中，传感器作为运动主体感知环境的唯一途径，承担了从环境中获取观测数据的作用。传感器的不同意味着观测数据不同，也将 SLAM 问题分为不同类别，常见的如以相机为主要传感器的视觉 SLAM（Visual SLAM）和以激光雷达为主要传感器的激光 SLAM（LiDAR SLAM）等。在视觉 SLAM 的背景下，SLAM 问题就变成了从一系列连续图像中估计相机位姿，并基于图像特征等信息构建环境地图的过程。"><script type=application/ld+json>{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Posts","item":"https://congyuxiaoyoudao.github.io/posts/"},{"@type":"ListItem","position":2,"name":"SLAM Biography I · Problem Formulation and Model Construction","item":"https://congyuxiaoyoudao.github.io/posts/slam-biography/problem-formulation-and-model-construction/"}]}</script><script type=application/ld+json>{"@context":"https://schema.org","@type":"BlogPosting","headline":"SLAM Biography I · Problem Formulation and Model Construction","name":"SLAM Biography I · Problem Formulation and Model Construction","description":" 本文及其所属的专栏是笔者阅读学习高翔博士视觉 SLAM 十四讲的产物，看书跑代码总是匆匆而过，写点笔记加深印象。本来的打算是按书的节奏依次为每章做总结，但最后觉得这样效率太低且不够连贯，还是凭自己的思路写下去。观前提示，这一部分偏向理论，不可避免地文字会比较多\n0x00 To begin with 这篇文章将会包含以下内容：\n什么是 SLAM 问题 SLAM 问题的数学模型 For reference：\n视觉 SLAM 十四讲视频课程： 【高翔】视觉SLAM十四讲 视觉 SLAM 十四讲配套代码仓库： gaoxiang12/slambook2: edition 2 of the slambook 个人学习代码仓库： congyuxiaoyoudao/learn-slambook2: Learn Basic Knowledge on Visual SLAM: From Theory to Practice 2nd edition by Xiang Gao 0x01 何为 SLAM？ What is SLAM 认识任何一个事物或者技术总是可以从两个角度出发：它是什么以及它能做什么？\nSLAM，全称为 Simultaneous Localization and Mapping，翻译过来就是同步定位与建图。它要求携带传感器的主体（例如运动机器人），在环境信息未知的情况下，通过自身在环境中的运动同步估计运动过程并建立环境的模型。这样来看，SLAM 的核心问题有二：\n定位（Localization）：携带传感器的主体需要通过传感器感知环境信息判断自身的状态（位姿）； 建图（Mapping）：主体基于自身连续轨迹上的观测数据，逐步建立环境地图； 此外，这两个问题间还有一个实时性的要求，即 Simultaneous（同步），同步地完成定位与建图，而非先进行信息采集再将数据传送回去做全局的估计和优化（那样耗时和局限就比较大，也就没意义了）。\n在 SLAM 问题中，传感器作为运动主体感知环境的唯一途径，承担了从环境中获取观测数据的作用。传感器的不同意味着观测数据不同，也将 SLAM 问题分为不同类别，常见的如以相机为主要传感器的视觉 SLAM（Visual SLAM）和以激光雷达为主要传感器的激光 SLAM（LiDAR SLAM）等。在视觉 SLAM 的背景下，SLAM 问题就变成了从一系列连续图像中估计相机位姿，并基于图像特征等信息构建环境地图的过程。\n","keywords":["SLAM","非线性优化"],"articleBody":" 本文及其所属的专栏是笔者阅读学习高翔博士视觉 SLAM 十四讲的产物，看书跑代码总是匆匆而过，写点笔记加深印象。本来的打算是按书的节奏依次为每章做总结，但最后觉得这样效率太低且不够连贯，还是凭自己的思路写下去。观前提示，这一部分偏向理论，不可避免地文字会比较多\n0x00 To begin with 这篇文章将会包含以下内容：\n什么是 SLAM 问题 SLAM 问题的数学模型 For reference：\n视觉 SLAM 十四讲视频课程： 【高翔】视觉SLAM十四讲 视觉 SLAM 十四讲配套代码仓库： gaoxiang12/slambook2: edition 2 of the slambook 个人学习代码仓库： congyuxiaoyoudao/learn-slambook2: Learn Basic Knowledge on Visual SLAM: From Theory to Practice 2nd edition by Xiang Gao 0x01 何为 SLAM？ What is SLAM 认识任何一个事物或者技术总是可以从两个角度出发：它是什么以及它能做什么？\nSLAM，全称为 Simultaneous Localization and Mapping，翻译过来就是同步定位与建图。它要求携带传感器的主体（例如运动机器人），在环境信息未知的情况下，通过自身在环境中的运动同步估计运动过程并建立环境的模型。这样来看，SLAM 的核心问题有二：\n定位（Localization）：携带传感器的主体需要通过传感器感知环境信息判断自身的状态（位姿）； 建图（Mapping）：主体基于自身连续轨迹上的观测数据，逐步建立环境地图； 此外，这两个问题间还有一个实时性的要求，即 Simultaneous（同步），同步地完成定位与建图，而非先进行信息采集再将数据传送回去做全局的估计和优化（那样耗时和局限就比较大，也就没意义了）。\n在 SLAM 问题中，传感器作为运动主体感知环境的唯一途径，承担了从环境中获取观测数据的作用。传感器的不同意味着观测数据不同，也将 SLAM 问题分为不同类别，常见的如以相机为主要传感器的视觉 SLAM（Visual SLAM）和以激光雷达为主要传感器的激光 SLAM（LiDAR SLAM）等。在视觉 SLAM 的背景下，SLAM 问题就变成了从一系列连续图像中估计相机位姿，并基于图像特征等信息构建环境地图的过程。\n对人类来说，这个过程是很自然的：置身于陌生环境中时，我们可以很容易地四处观察，理解环境的构成，然后在脑中建立环境的概念模型。但对计算机来说则不然，单是提取图像中蕴含的丰富语义信息这一任务就极具挑战，尤其考虑到图像在计算机中仅仅是一系列数值矩阵。幸运的是，随着数十年来的研究进展，SLAM 技术已渐趋成熟：一方面，依靠人工智能的机器学习、深度学习中数值驱动的方法，计算机能够从图像中识别特征、分辨物体；另一方面，硬件的进步带来了更为先进的传感器，例如能够直接估计场景深度的 RGB-D 相机，和高精度的 3D 激光雷达。这些先进的传感器提供了更为丰富、精确的环境信息，为在复杂环境中的定位和建图提高了准确性和鲁棒性。\nSLAM 技术最早可以追溯到上世纪 90 年代，为机器人学的一个概念，随着 30 多年的发展，演变为机器人学和计算机视觉中的热门研究领域。如今的 SLAM 技术早已迈出大学的实验室，走向了工业界的实际应用：通过 SLAM 技术构建的环境地图，可以支撑很多的下游任务，例如三维重建、路径规划、自动驾驶、场景标注与理解、VR \u0026 AR 等等。下至家中的扫地机器人，上至太空中的天体探测车，背后都有 SLAM 的身影。\n0x02 问题建立 Problem Setup 高翔博士的 SLAM 十四讲是以视觉 SLAM 为前提的，因此这里的问题模型也是基于视觉 SLAM\n要让机器人能够解决上述提及的两个核心问题，它需要首先知道一些信息：\n自身的初始状态与随时间的运动过程 一些时刻一些位置的某些观测信息 前者可以通过设定的初始值和运动传感器每个时刻的读数估计，后者可以通过相机传感器的观测数据获得。现在假设机器人在一个未知环境中运动，相机在离散时刻 $t=1,\\dots,K\\in \\mathcal{T}$ 采集环境数据，用 $\\boldsymbol{x}$ 表示机器人的位姿，那么这些时刻的位姿为 $\\boldsymbol{x}{1},\\dots,\\boldsymbol{x}{K}$。运动传感器在这些时刻会产生输入数据 $\\boldsymbol{u}{1},\\dots \\boldsymbol{u}{K}$，相机传感器在这些时刻也可能观测到某些路标（视觉 SLAM 中可以理解为图像的特征点，假设一共有 $N$ 个路标 $\\boldsymbol{y}{1},\\dots,\\boldsymbol{y}{N}$）。为了更好地描述这两个过程，我们可以将它们抽象地建模为两个方程：\n$$ \\begin{cases} \\boldsymbol{x}_{k}=f(\\boldsymbol{x}_{k-1},\\boldsymbol{u}_{k})+\\boldsymbol{w}_{k}\u0026 k=1,\\dots,K \\\\ \\boldsymbol{z}_{k,j}=h(\\boldsymbol{y}_{j},\\boldsymbol{x}_{k})+\\boldsymbol{v}_{k,j}\u0026 (k,j)\\in \\mathcal{O} \\end{cases} \\tag{2.1} $$ 第一个方程中，$\\boldsymbol{x}{k}$ 为 $k$ 时刻的位姿，$\\boldsymbol{u}{k}$ 为 $k$ 时刻的运动传感器输入，$\\boldsymbol{w}{k}$ 为 $k$ 时刻的噪声（传感器不可能完美地反馈真实的运动情况），$f$ 为描述从 $\\boldsymbol{x}{k-1},\\boldsymbol{u}{k},\\boldsymbol{w}{k}$ 中得到 $\\boldsymbol{x}{k}$ 的一般函数；第二个方程中，$\\boldsymbol{z}{k,j}$ 表示视觉传感器在 $k$ 时刻观测到了路标点 $\\boldsymbol{y}{j}$ 产生的观测数据，$\\mathcal{O}$ 是一个集合，描述在哪些时刻观测到了哪些数据，$\\boldsymbol{v}{k,j},h$ 同理为该过程中的噪声和函数。至于为何不解析地表达这些函数，是因为不同的传感器产生的数据形式不同，从而有不同的参数化方式，这里使用一个抽象的表达，可以保持通用性~~（多态？）~~。\n有了这两个方程，我们可以将 SLAM 问题描述为已知运动传感器读数 $\\boldsymbol{u}$ 和观测数据 $\\boldsymbol{z}$ 时，估计 $\\boldsymbol{x}$ 和 $\\boldsymbol{y}$ 的条件分布——这是一个状态估计问题：\n$$ P(\\boldsymbol{x},\\boldsymbol{y}|\\boldsymbol{z},\\boldsymbol{u}) \\tag{2.2} $$ 它是一个后验概率，描述在当前所有可用信息下，对轨迹和地图的最佳一致性估计。直接求解后验概率是分布的，状态空间的维度太高，但利用贝叶斯法则，可以将其转化为一个正比于似然和先验概率的乘积的分布：\n$$ P(\\boldsymbol{x},\\boldsymbol{y}|\\boldsymbol{z},\\boldsymbol{u})=\\frac{P(\\boldsymbol{z},\\boldsymbol{u}|\\boldsymbol{x},\\boldsymbol{y})P(\\boldsymbol{x},\\boldsymbol{y})}{P(\\boldsymbol{z},\\boldsymbol{u})}\\propto \\underbrace{P(\\boldsymbol{z},\\boldsymbol{u}|\\boldsymbol{x},\\boldsymbol{y})}_{\\text{Likehood}}\\,\\underbrace{P(\\boldsymbol{x},\\boldsymbol{y})}_{\\text{Prior}}\\tag{2.3} $$ 其中似然描述了在给定的位姿下可能产生怎样的观测数据，先验概率描述了观测前对机器人位姿和场景的了解。分母 $P(\\boldsymbol{z},\\boldsymbol{u})$ 是归一化因子，用于保证概率分布和为 1，这里和估计变量无关，所以可以忽略。通过贝叶斯法则，我们不直接求后验分布，而是退而求其次，找一个最可能的 $\\boldsymbol{x},\\boldsymbol{y}$ 状态代表解，也就是做最大后验估计（Maximum A Posteriori Estimation，MAP）：\n$$ (\\boldsymbol{x},\\boldsymbol{y})^{\\ast}_{\\text{MAP}}=\\arg \\max P(\\boldsymbol{x},\\boldsymbol{y}|\\boldsymbol{z},\\boldsymbol{u})=\\underbrace{P(\\boldsymbol{z},\\boldsymbol{u}|\\boldsymbol{x},\\boldsymbol{y})}_{\\text{Likehood}}\\,\\underbrace{P(\\boldsymbol{x},\\boldsymbol{y})}_{\\text{Prior}} \\tag{2.4} $$ 在未知环境中，通常也没有 $\\boldsymbol{x},\\boldsymbol{y}$ 的全局先验信息，这样最后求解状态估计问题就可以转化为做最大似然估计（Maximum Likelihood Estimation，MLE）：\n$$ (\\boldsymbol{x},\\boldsymbol{y})^{\\ast}_{\\text{MLE}}=\\arg \\max P(\\boldsymbol{z},\\boldsymbol{u}|\\boldsymbol{x},\\boldsymbol{y}) \\tag{2.5} $$ 也就是 $\\boldsymbol{x},\\boldsymbol{y}$ 在怎样的状态下最容易产生现有的观测数据。\n对于这个联合分布似然，假设给定轨迹 $\\boldsymbol{x}$，运动输入 $\\boldsymbol{u}$ 独立于 $\\boldsymbol{z},\\boldsymbol{y}$，我们可以将其拆分为观测模型和运动模型：\n$$ P(\\boldsymbol{z},\\boldsymbol{u}|\\boldsymbol{x},\\boldsymbol{y})=P(\\boldsymbol{z}|\\boldsymbol{x},\\boldsymbol{y})P(\\boldsymbol{u}|\\boldsymbol{z},\\boldsymbol{x},\\boldsymbol{y})=\\underbrace{P(\\boldsymbol{z}|\\boldsymbol{x},\\boldsymbol{y})}_{\\text{Observation}}\\,\\underbrace{P(\\boldsymbol{u}|\\boldsymbol{x})}_{\\text{Action}}\\tag{2.6} $$ 进一步假设各时刻的运动输入间、各个观测间是独立的，那么可以将两个模型分解为各个观测和输入分布的乘积：\n$$ P(\\boldsymbol{z}|\\boldsymbol{x},\\boldsymbol{y})P(\\boldsymbol{u}|\\boldsymbol{x})=\\prod_{k,j}P(\\boldsymbol{z}_{k,j}|\\boldsymbol{x}_{k},\\boldsymbol{y}_{j})\\prod_{k}P(\\boldsymbol{u}_{k}|\\boldsymbol{x}_{k-1},\\boldsymbol{x}_{k})\\tag{2.7} $$ 回顾式 $(2.5)$，最大化似然就相当于最大化上式的乘积，实践中通常假设各个分布为高斯分布，然后使用最小化负对数似然（Minimize Negative Log-Likelihood）来求最大似然。\n对于某个观测数据的观测方程 $\\boldsymbol{z}{k,j}=h(\\boldsymbol{y}{j},\\boldsymbol{x}{k})+\\boldsymbol{v}{k,j}$，假设噪声项服从一个高斯分布 $\\boldsymbol{v}{k,j}\\sim \\mathcal{N}(0,\\boldsymbol{Q}{k,j})$，那么观测数据条件概率为：\n$$ P(\\boldsymbol{z}_{k,j}|\\boldsymbol{x}_{k},\\boldsymbol{y}_{j})=N(h(\\boldsymbol{y}_{j},\\boldsymbol{x}_{k}),\\boldsymbol{Q}_{k,j})\\tag{2.8} $$ 给定 $\\boldsymbol{x}{k},\\boldsymbol{y}{j}$，理想观测数据为 $h(\\boldsymbol{y}{j},\\boldsymbol{x}{k})$，但由于噪声存在，真实观测的条件概率也为一个以 $h(\\boldsymbol{y}{j},\\boldsymbol{x}{k})$ 为均值，$\\boldsymbol{Q}{k,j}$ 为协方差的高斯分布。同理假设运动数据的噪声项 $\\boldsymbol{w}{k}\\sim \\mathcal{N}(0,\\boldsymbol{R}_{k})$，那么运动数据也服从高斯分布，其条件概率为：\n$$ P(\\boldsymbol{u}_{k}|\\boldsymbol{x}_{k-1},\\boldsymbol{x}_{k})=N(g(\\boldsymbol{x}_{k-1},\\boldsymbol{x}_{k}),\\boldsymbol{R}_{k})\\tag{2.9} $$ 高斯分布的概率密度函数为：\n$$ P(x)=\\frac{1}{\\sqrt{ (2\\pi)^N \\det(\\Sigma)}}\\exp\\left( -\\frac{1}{2}(x-\\mu)^\\top \\Sigma^{-1}(x-\\mu) \\right)\\tag{2.10} $$ 取负对数：\n$$ -\\ln(P(x))=\\frac{1}{2}\\ln \\left((2\\pi)^N\\det(\\Sigma)\\right)+\\frac{1}{2}(x-\\mu)^\\top \\Sigma^{-1}(x-\\mu)\\tag{2.11} $$ 我们想要最小化上式，而第一项（其中 $N$ 为 $x$ 的维度）与变量无关，可以忽略，所以最终只要最小化右侧的二次型：\n$$ x^{\\ast}_{\\text{MLE}}=\\arg \\max P(x)=\\arg \\min (x-\\mu)^\\top \\Sigma^{-1}(x-\\mu)\\tag{2.11} $$ 最后代入 SLAM 的观测模型和运动模型，定义每个估计的观测数据和运动数据与真实结果（Ground Truth）的残差项：\n$$ \\begin{aligned} \\boldsymbol{e}_{\\boldsymbol{z},j,k}\u0026=\\boldsymbol{z}_{k,j}-h(\\boldsymbol{y}_{j},\\boldsymbol{x}_{k})\\\\ \\boldsymbol{e}_{\\boldsymbol{u},k}\u0026=\\boldsymbol{x}_{k}-f(\\boldsymbol{x}_{k-1},\\boldsymbol{u}_{k}) \\end{aligned}\\tag{2.12} $$ 代入式 $(2.11)$，得到一个数据的最优估计，结合式 $(2.7)$，由于对数的性质将乘积转为求和：\n$$ \\min J(\\boldsymbol{x},\\boldsymbol{y})=\\sum_{k}\\sum_{j}\\boldsymbol{e}_{\\boldsymbol{z},j,k}^\\top\\boldsymbol{Q}_{k,j}^{-1}\\boldsymbol{e}_{\\boldsymbol{z},j,k}+\\sum_{k}\\boldsymbol{e}_{\\boldsymbol{u},k}^\\top\\boldsymbol{R}_{k}^{-1}\\boldsymbol{e}_{\\boldsymbol{u},k}\\tag{2.13} $$ 可以看到，最终得到了一个最小二乘问题。该问题的目标函数是由多个误差项的加权求和组成，虽然整体状态空间的维度很高，但对于每一个残差项来说是简单的，仅与少量有限个状态变量有关，这使得求解具备了稀疏性，可以使用稀疏优化方法高效求解。\n0x03 Afterwords 本篇文章中笔者仅将 SLAM 问题使用一个抽象的数学模型描述，而没有讨论具体的一些实现框架和算法细节，本篇也旨在让读者对 SLAM 有大致的了解，至少明白它是什么、能解决什么问题、有怎样的应用领域。在之后的文章中，会逐步介绍 SLAM 主流求解框架以及它的各个模块的主要算法。\nEnjoy it!\n","wordCount":"295","inLanguage":"zh","datePublished":"2025-09-25T00:00:00Z","dateModified":"2025-09-25T00:00:00Z","author":{"@type":"Person","name":"The Only Problem"},"mainEntityOfPage":{"@type":"WebPage","@id":"https://congyuxiaoyoudao.github.io/posts/slam-biography/problem-formulation-and-model-construction/"},"publisher":{"@type":"Organization","name":"The Only Problem's Blog","logo":{"@type":"ImageObject","url":"https://congyuxiaoyoudao.github.io/favicon.ico"}}}</script></head><body id=top><script>localStorage.getItem("pref-theme")==="dark"?document.body.classList.add("dark"):localStorage.getItem("pref-theme")==="light"?document.body.classList.remove("dark"):window.matchMedia("(prefers-color-scheme: dark)").matches&&document.body.classList.add("dark")</script><header class=header><nav class=nav><div class=logo><a href=https://congyuxiaoyoudao.github.io/ accesskey=h title="The Only Problem's Blog (Alt + H)">The Only Problem's Blog</a><div class=logo-switches><button id=theme-toggle accesskey=t title="(Alt + T)" aria-label="Toggle theme">
+<svg id="moon" width="24" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+<svg id="sun" width="24" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg></button></div></div><ul id=menu><li><a href=https://congyuxiaoyoudao.github.io/archives/ title=Archive><span>Archive</span></a></li><li><a href=https://congyuxiaoyoudao.github.io/search/ title="Search (Alt + /)" accesskey=/><span>Search</span></a></li><li><a href=https://congyuxiaoyoudao.github.io/tags/ title=Tags><span>Tags</span></a></li><li><a href=https://congyuxiaoyoudao.github.io/about/ title=About><span>About</span></a></li></ul></nav></header><main class=main><article class=post-single><header class=post-header><div class=breadcrumbs><a href=https://congyuxiaoyoudao.github.io/>主页</a>&nbsp;»&nbsp;<a href=https://congyuxiaoyoudao.github.io/posts/>Posts</a></div><h1 class="post-title entry-hint-parent">SLAM Biography I · Problem Formulation and Model Construction</h1><div class=post-meta><span title='2025-09-25 00:00:00 +0000 UTC'>九月 25, 2025</span>&nbsp;·&nbsp;2 分钟&nbsp;·&nbsp;The Only Problem</div></header><div class=toc><details><summary accesskey=c title="(Alt + C)"><span class=details>目录</span></summary><div class=inner><ul><li><a href=#0x00-to-begin-with aria-label="0x00 To begin with">0x00 To begin with</a></li><li><a href=#0x01-%e4%bd%95%e4%b8%ba-slam-what-is-slam aria-label="0x01 何为 SLAM？ What is SLAM">0x01 何为 SLAM？ What is SLAM</a></li><li><a href=#0x02-%e9%97%ae%e9%a2%98%e5%bb%ba%e7%ab%8b-problem-setup aria-label="0x02 问题建立 Problem Setup">0x02 问题建立 Problem Setup</a></li><li><a href=#0x03-afterwords aria-label="0x03 Afterwords">0x03 Afterwords</a></li></ul></div></details></div><div class=post-content><blockquote><p>本文及其所属的专栏是笔者阅读学习高翔博士视觉 SLAM 十四讲的产物，看书跑代码总是匆匆而过，写点笔记加深印象。本来的打算是按书的节奏依次为每章做总结，但最后觉得这样效率太低且不够连贯，还是凭自己的思路写下去。观前提示，这一部分偏向理论，不可避免地文字会比较多</p></blockquote><hr><h2 id=0x00-to-begin-with>0x00 To begin with<a hidden class=anchor aria-hidden=true href=#0x00-to-begin-with>#</a></h2><p>这篇文章将会包含以下内容：</p><ul><li><input checked disabled type=checkbox> 什么是 SLAM 问题</li><li><input checked disabled type=checkbox> SLAM 问题的数学模型</li></ul><p><strong>For reference</strong>：</p><ul><li>视觉 SLAM 十四讲视频课程：
+<a href=https://www.bilibili.com/video/BV16t411g7FR>【高翔】视觉SLAM十四讲</a></li><li>视觉 SLAM 十四讲配套代码仓库：
+<a href=https://github.com/gaoxiang12/slambook2>gaoxiang12/slambook2: edition 2 of the slambook</a></li><li>个人学习代码仓库：
+<a href=https://github.com/congyuxiaoyoudao/learn-slambook2>congyuxiaoyoudao/learn-slambook2: Learn Basic Knowledge on Visual SLAM: From Theory to Practice 2nd edition by Xiang Gao</a></li></ul><hr><h2 id=0x01-何为-slam-what-is-slam>0x01 何为 SLAM？ What is SLAM<a hidden class=anchor aria-hidden=true href=#0x01-何为-slam-what-is-slam>#</a></h2><blockquote><p>认识任何一个事物或者技术总是可以从两个角度出发：它是什么以及它能做什么？</p></blockquote><p>SLAM，全称为 Simultaneous Localization and Mapping，翻译过来就是同步定位与建图。它要求携带传感器的主体（例如运动机器人），在环境信息未知的情况下，通过自身在环境中的运动同步估计运动过程并建立环境的模型。这样来看，SLAM 的核心问题有二：</p><ul><li>定位（Localization）：携带传感器的主体需要通过传感器感知环境信息判断自身的状态（位姿）；</li><li>建图（Mapping）：主体基于自身连续轨迹上的观测数据，逐步建立环境地图；</li></ul><p>此外，这两个问题间还有一个实时性的要求，即 Simultaneous（同步），同步地完成定位与建图，而非先进行信息采集再将数据传送回去做全局的估计和优化（那样耗时和局限就比较大，也就没意义了）。</p><p>在 SLAM 问题中，传感器作为运动主体感知环境的唯一途径，承担了从环境中获取观测数据的作用。传感器的不同意味着观测数据不同，也将 SLAM 问题分为不同类别，常见的如以相机为主要传感器的视觉 SLAM（Visual SLAM）和以激光雷达为主要传感器的激光 SLAM（LiDAR SLAM）等。在视觉 SLAM 的背景下，SLAM 问题就变成了从一系列连续图像中估计相机位姿，并基于图像特征等信息构建环境地图的过程。</p><p>对人类来说，这个过程是很自然的：置身于陌生环境中时，我们可以很容易地四处观察，理解环境的构成，然后在脑中建立环境的概念模型。但对计算机来说则不然，单是提取图像中蕴含的丰富语义信息这一任务就极具挑战，尤其考虑到图像在计算机中仅仅是一系列数值矩阵。幸运的是，随着数十年来的研究进展，SLAM 技术已渐趋成熟：一方面，依靠人工智能的机器学习、深度学习中数值驱动的方法，计算机能够从图像中识别特征、分辨物体；另一方面，硬件的进步带来了更为先进的传感器，例如能够直接估计场景深度的 RGB-D 相机，和高精度的 3D 激光雷达。这些先进的传感器提供了更为丰富、精确的环境信息，为在复杂环境中的定位和建图提高了准确性和鲁棒性。</p><p>SLAM 技术最早可以追溯到上世纪 90 年代，为机器人学的一个概念，随着 30 多年的发展，演变为机器人学和计算机视觉中的热门研究领域。如今的 SLAM 技术早已迈出大学的实验室，走向了工业界的实际应用：通过 SLAM 技术构建的环境地图，可以支撑很多的下游任务，例如三维重建、路径规划、自动驾驶、场景标注与理解、VR & AR 等等。下至家中的扫地机器人，上至太空中的天体探测车，背后都有 SLAM 的身影。</p><hr><h2 id=0x02-问题建立-problem-setup>0x02 问题建立 Problem Setup<a hidden class=anchor aria-hidden=true href=#0x02-问题建立-problem-setup>#</a></h2><blockquote><p>高翔博士的 SLAM 十四讲是以视觉 SLAM 为前提的，因此这里的问题模型也是基于视觉 SLAM</p></blockquote><p>要让机器人能够解决上述提及的两个核心问题，它需要首先知道一些信息：</p><ul><li>自身的初始状态与随时间的运动过程</li><li>一些时刻一些位置的某些观测信息</li></ul><p>前者可以通过设定的初始值和运动传感器每个时刻的读数估计，后者可以通过相机传感器的观测数据获得。现在假设机器人在一个未知环境中运动，相机在离散时刻 $t=1,\dots,K\in \mathcal{T}$ 采集环境数据，用 $\boldsymbol{x}$ 表示机器人的位姿，那么这些时刻的位姿为 $\boldsymbol{x}<em>{1},\dots,\boldsymbol{x}</em>{K}$。运动传感器在这些时刻会产生输入数据 $\boldsymbol{u}<em>{1},\dots \boldsymbol{u}</em>{K}$，相机传感器在这些时刻也可能观测到某些路标（视觉 SLAM 中可以理解为图像的特征点，假设一共有 $N$ 个路标 $\boldsymbol{y}<em>{1},\dots,\boldsymbol{y}</em>{N}$）。为了更好地描述这两个过程，我们可以将它们抽象地建模为两个方程：</p><div>$$
+\begin{cases}
+\boldsymbol{x}_{k}=f(\boldsymbol{x}_{k-1},\boldsymbol{u}_{k})+\boldsymbol{w}_{k}& k=1,\dots,K \\
+\boldsymbol{z}_{k,j}=h(\boldsymbol{y}_{j},\boldsymbol{x}_{k})+\boldsymbol{v}_{k,j}& (k,j)\in \mathcal{O}
+\end{cases}
+\tag{2.1}
+$$</div><p>第一个方程中，$\boldsymbol{x}<em>{k}$ 为 $k$ 时刻的位姿，$\boldsymbol{u}</em>{k}$ 为 $k$ 时刻的运动传感器输入，$\boldsymbol{w}<em>{k}$ 为 $k$ 时刻的噪声（传感器不可能完美地反馈真实的运动情况），$f$ 为描述从 $\boldsymbol{x}</em>{k-1},\boldsymbol{u}<em>{k},\boldsymbol{w}</em>{k}$ 中得到 $\boldsymbol{x}<em>{k}$ 的一般函数；第二个方程中，$\boldsymbol{z}</em>{k,j}$ 表示视觉传感器在 $k$ 时刻观测到了路标点 $\boldsymbol{y}<em>{j}$ 产生的观测数据，$\mathcal{O}$ 是一个集合，描述在哪些时刻观测到了哪些数据，$\boldsymbol{v}</em>{k,j},h$ 同理为该过程中的噪声和函数。至于为何不解析地表达这些函数，是因为不同的传感器产生的数据形式不同，从而有不同的参数化方式，这里使用一个抽象的表达，可以保持通用性~~（多态？）~~。</p><p>有了这两个方程，我们可以将 SLAM 问题描述为已知运动传感器读数 $\boldsymbol{u}$ 和观测数据 $\boldsymbol{z}$ 时，估计 $\boldsymbol{x}$ 和 $\boldsymbol{y}$ 的条件分布——这是一个状态估计问题：</p><div>$$
+P(\boldsymbol{x},\boldsymbol{y}|\boldsymbol{z},\boldsymbol{u}) \tag{2.2}
+$$</div><p>它是一个后验概率，描述在当前所有可用信息下，对轨迹和地图的最佳一致性估计。直接求解后验概率是分布的，状态空间的维度太高，但利用贝叶斯法则，可以将其转化为一个正比于似然和先验概率的乘积的分布：</p><div>$$
+P(\boldsymbol{x},\boldsymbol{y}|\boldsymbol{z},\boldsymbol{u})=\frac{P(\boldsymbol{z},\boldsymbol{u}|\boldsymbol{x},\boldsymbol{y})P(\boldsymbol{x},\boldsymbol{y})}{P(\boldsymbol{z},\boldsymbol{u})}\propto \underbrace{P(\boldsymbol{z},\boldsymbol{u}|\boldsymbol{x},\boldsymbol{y})}_{\text{Likehood}}\,\underbrace{P(\boldsymbol{x},\boldsymbol{y})}_{\text{Prior}}\tag{2.3}
+$$</div><p>其中似然描述了在给定的位姿下可能产生怎样的观测数据，先验概率描述了观测前对机器人位姿和场景的了解。分母 $P(\boldsymbol{z},\boldsymbol{u})$ 是归一化因子，用于保证概率分布和为 1，这里和估计变量无关，所以可以忽略。通过贝叶斯法则，我们不直接求后验分布，而是退而求其次，找一个最可能的 $\boldsymbol{x},\boldsymbol{y}$ 状态代表解，也就是做最大后验估计（Maximum A Posteriori Estimation，MAP）：</p><div>$$
+(\boldsymbol{x},\boldsymbol{y})^{\ast}_{\text{MAP}}=\arg \max P(\boldsymbol{x},\boldsymbol{y}|\boldsymbol{z},\boldsymbol{u})=\underbrace{P(\boldsymbol{z},\boldsymbol{u}|\boldsymbol{x},\boldsymbol{y})}_{\text{Likehood}}\,\underbrace{P(\boldsymbol{x},\boldsymbol{y})}_{\text{Prior}} \tag{2.4}
+$$</div><p>在未知环境中，通常也没有 $\boldsymbol{x},\boldsymbol{y}$ 的全局先验信息，这样最后求解状态估计问题就可以转化为做最大似然估计（Maximum Likelihood Estimation，MLE）：</p><div>$$
+(\boldsymbol{x},\boldsymbol{y})^{\ast}_{\text{MLE}}=\arg \max P(\boldsymbol{z},\boldsymbol{u}|\boldsymbol{x},\boldsymbol{y}) \tag{2.5}
+$$</div><p>也就是 $\boldsymbol{x},\boldsymbol{y}$ 在怎样的状态下最容易产生现有的观测数据。</p><p>对于这个联合分布似然，假设给定轨迹 $\boldsymbol{x}$，运动输入 $\boldsymbol{u}$ 独立于 $\boldsymbol{z},\boldsymbol{y}$，我们可以将其拆分为观测模型和运动模型：</p><div>$$
+P(\boldsymbol{z},\boldsymbol{u}|\boldsymbol{x},\boldsymbol{y})=P(\boldsymbol{z}|\boldsymbol{x},\boldsymbol{y})P(\boldsymbol{u}|\boldsymbol{z},\boldsymbol{x},\boldsymbol{y})=\underbrace{P(\boldsymbol{z}|\boldsymbol{x},\boldsymbol{y})}_{\text{Observation}}\,\underbrace{P(\boldsymbol{u}|\boldsymbol{x})}_{\text{Action}}\tag{2.6}
+$$</div><p>进一步假设各时刻的运动输入间、各个观测间是独立的，那么可以将两个模型分解为各个观测和输入分布的乘积：</p><div>$$
+P(\boldsymbol{z}|\boldsymbol{x},\boldsymbol{y})P(\boldsymbol{u}|\boldsymbol{x})=\prod_{k,j}P(\boldsymbol{z}_{k,j}|\boldsymbol{x}_{k},\boldsymbol{y}_{j})\prod_{k}P(\boldsymbol{u}_{k}|\boldsymbol{x}_{k-1},\boldsymbol{x}_{k})\tag{2.7}
+$$</div><p>回顾式 $(2.5)$，最大化似然就相当于最大化上式的乘积，实践中通常假设各个分布为高斯分布，然后使用最小化负对数似然（Minimize Negative Log-Likelihood）来求最大似然。</p><p>对于某个观测数据的观测方程 $\boldsymbol{z}<em>{k,j}=h(\boldsymbol{y}</em>{j},\boldsymbol{x}<em>{k})+\boldsymbol{v}</em>{k,j}$，假设噪声项服从一个高斯分布 $\boldsymbol{v}<em>{k,j}\sim \mathcal{N}(0,\boldsymbol{Q}</em>{k,j})$，那么观测数据条件概率为：</p><div>$$
+P(\boldsymbol{z}_{k,j}|\boldsymbol{x}_{k},\boldsymbol{y}_{j})=N(h(\boldsymbol{y}_{j},\boldsymbol{x}_{k}),\boldsymbol{Q}_{k,j})\tag{2.8}
+$$</div><p>给定 $\boldsymbol{x}<em>{k},\boldsymbol{y}</em>{j}$，理想观测数据为 $h(\boldsymbol{y}<em>{j},\boldsymbol{x}</em>{k})$，但由于噪声存在，真实观测的条件概率也为一个以 $h(\boldsymbol{y}<em>{j},\boldsymbol{x}</em>{k})$ 为均值，$\boldsymbol{Q}<em>{k,j}$ 为协方差的高斯分布。同理假设运动数据的噪声项 $\boldsymbol{w}</em>{k}\sim \mathcal{N}(0,\boldsymbol{R}_{k})$，那么运动数据也服从高斯分布，其条件概率为：</p><div>$$
+P(\boldsymbol{u}_{k}|\boldsymbol{x}_{k-1},\boldsymbol{x}_{k})=N(g(\boldsymbol{x}_{k-1},\boldsymbol{x}_{k}),\boldsymbol{R}_{k})\tag{2.9}
+$$</div><p>高斯分布的概率密度函数为：</p><div>$$
+P(x)=\frac{1}{\sqrt{ (2\pi)^N \det(\Sigma)}}\exp\left( -\frac{1}{2}(x-\mu)^\top \Sigma^{-1}(x-\mu) \right)\tag{2.10}
+$$</div><p>取负对数：</p><div>$$
+-\ln(P(x))=\frac{1}{2}\ln \left((2\pi)^N\det(\Sigma)\right)+\frac{1}{2}(x-\mu)^\top \Sigma^{-1}(x-\mu)\tag{2.11}
+$$</div><p>我们想要最小化上式，而第一项（其中 $N$ 为 $x$ 的维度）与变量无关，可以忽略，所以最终只要最小化右侧的二次型：</p><div>$$
+x^{\ast}_{\text{MLE}}=\arg \max P(x)=\arg \min (x-\mu)^\top \Sigma^{-1}(x-\mu)\tag{2.11}
+$$</div><p>最后代入 SLAM 的观测模型和运动模型，定义每个估计的观测数据和运动数据与真实结果（Ground Truth）的残差项：</p><div>$$
+\begin{aligned}
+\boldsymbol{e}_{\boldsymbol{z},j,k}&=\boldsymbol{z}_{k,j}-h(\boldsymbol{y}_{j},\boldsymbol{x}_{k})\\
+\boldsymbol{e}_{\boldsymbol{u},k}&=\boldsymbol{x}_{k}-f(\boldsymbol{x}_{k-1},\boldsymbol{u}_{k})
+\end{aligned}\tag{2.12}
+$$</div><p>代入式 $(2.11)$，得到一个数据的最优估计，结合式 $(2.7)$，由于对数的性质将乘积转为求和：</p><div>$$
+\min J(\boldsymbol{x},\boldsymbol{y})=\sum_{k}\sum_{j}\boldsymbol{e}_{\boldsymbol{z},j,k}^\top\boldsymbol{Q}_{k,j}^{-1}\boldsymbol{e}_{\boldsymbol{z},j,k}+\sum_{k}\boldsymbol{e}_{\boldsymbol{u},k}^\top\boldsymbol{R}_{k}^{-1}\boldsymbol{e}_{\boldsymbol{u},k}\tag{2.13}
+$$</div><p>可以看到，最终得到了一个最小二乘问题。该问题的目标函数是由多个误差项的加权求和组成，虽然整体状态空间的维度很高，但对于每一个残差项来说是简单的，仅与少量有限个状态变量有关，这使得求解具备了稀疏性，可以使用稀疏优化方法高效求解。</p><hr><h2 id=0x03-afterwords>0x03 Afterwords<a hidden class=anchor aria-hidden=true href=#0x03-afterwords>#</a></h2><p>本篇文章中笔者仅将 SLAM 问题使用一个抽象的数学模型描述，而没有讨论具体的一些实现框架和算法细节，本篇也旨在让读者对 SLAM 有大致的了解，至少明白它是什么、能解决什么问题、有怎样的应用领域。在之后的文章中，会逐步介绍 SLAM 主流求解框架以及它的各个模块的主要算法。</p><p>Enjoy it!</p></div><footer class=post-footer><ul class=post-tags><li><a href=https://congyuxiaoyoudao.github.io/tags/slam/>SLAM</a></li><li><a href=https://congyuxiaoyoudao.github.io/tags/%E9%9D%9E%E7%BA%BF%E6%80%A7%E4%BC%98%E5%8C%96/>非线性优化</a></li></ul><nav class=paginav><a class=next href=https://congyuxiaoyoudao.github.io/posts/interludes/poisson-reconstruction/><span class=title>下一页 »</span><br><span>Interlude 5. Poisson Reconstruction</span></a></nav></footer><div id=tw-comment></div><script>const getStoredTheme=()=>localStorage.getItem("pref-theme")==="light"?"light":"noborder_dark",setGiscusTheme=()=>{const e=e=>{const t=document.querySelector("iframe.giscus-frame");t&&t.contentWindow.postMessage({giscus:e},"https://giscus.app")};e({setConfig:{theme:getStoredTheme()}})};document.addEventListener("DOMContentLoaded",()=>{const s={src:"https://giscus.app/client.js","data-repo":"congyuxiaoyoudao/congyuxiaoyoudao.github.io","data-repo-id":"","data-category":"Announcements","data-category-id":"","data-mapping":"pathname","data-strict":"0","data-reactions-enabled":"","data-emit-metadata":"","data-input-position":"","data-theme":getStoredTheme(),"data-lang":"zh-CN","data-loading":"lazy",crossorigin:"anonymous"},e=document.createElement("script");Object.entries(s).forEach(([t,n])=>e.setAttribute(t,n)),document.querySelector("#tw-comment").appendChild(e);const t=document.querySelector("#theme-toggle");t&&t.addEventListener("click",setGiscusTheme);const n=document.querySelector("#theme-toggle-float");n&&n.addEventListener("click",setGiscusTheme)})</script></article></main><footer class=footer><span>&copy; 2025 <a href=https://congyuxiaoyoudao.github.io/>The Only Problem's Blog</a></span> ·
+<span>Powered by
+<a href=https://gohugo.io/ rel="noopener noreferrer" target=_blank>Hugo</a> &
+<a href=https://github.com/adityatelange/hugo-PaperMod/ rel=noopener target=_blank>PaperMod</a></span></footer><a href=#top aria-label="go to top" title="Go to Top (Alt + G)" class=top-link id=top-link accesskey=g><svg viewBox="0 0 12 6" fill="currentColor"><path d="M12 6H0l6-6z"/></svg>
+</a><script>let menu=document.getElementById("menu");menu&&(menu.scrollLeft=localStorage.getItem("menu-scroll-position"),menu.onscroll=function(){localStorage.setItem("menu-scroll-position",menu.scrollLeft)}),document.querySelectorAll('a[href^="#"]').forEach(e=>{e.addEventListener("click",function(e){e.preventDefault();var t=this.getAttribute("href").substr(1);window.matchMedia("(prefers-reduced-motion: reduce)").matches?document.querySelector(`[id='${decodeURIComponent(t)}']`).scrollIntoView():document.querySelector(`[id='${decodeURIComponent(t)}']`).scrollIntoView({behavior:"smooth"}),t==="top"?history.replaceState(null,null," "):history.pushState(null,null,`#${t}`)})})</script><script>var mybutton=document.getElementById("top-link");window.onscroll=function(){document.body.scrollTop>800||document.documentElement.scrollTop>800?(mybutton.style.visibility="visible",mybutton.style.opacity="1"):(mybutton.style.visibility="hidden",mybutton.style.opacity="0")}</script><script>document.getElementById("theme-toggle").addEventListener("click",()=>{document.body.className.includes("dark")?(document.body.classList.remove("dark"),localStorage.setItem("pref-theme","light")):(document.body.classList.add("dark"),localStorage.setItem("pref-theme","dark"))})</script><script>document.querySelectorAll("pre > code").forEach(e=>{const n=e.parentNode.parentNode,t=document.createElement("button");t.classList.add("copy-code"),t.innerHTML="复制";function s(){t.innerHTML="已复制！",setTimeout(()=>{t.innerHTML="复制"},2e3)}t.addEventListener("click",t=>{if("clipboard"in navigator){navigator.clipboard.writeText(e.textContent),s();return}const n=document.createRange();n.selectNodeContents(e);const o=window.getSelection();o.removeAllRanges(),o.addRange(n);try{document.execCommand("copy"),s()}catch{}o.removeRange(n)}),n.classList.contains("highlight")?n.appendChild(t):n.parentNode.firstChild==n||(e.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName=="TABLE"?e.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(t):e.parentNode.appendChild(t))})</script></body></html>

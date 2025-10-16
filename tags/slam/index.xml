@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>SLAM on The Only Problem&#39;s Blog</title>
+    <link>https://congyuxiaoyoudao.github.io/tags/slam/</link>
+    <description>Recent content in SLAM on The Only Problem&#39;s Blog</description>
+    <generator>Hugo -- 0.151.0</generator>
+    <language>zh</language>
+    <lastBuildDate>Thu, 25 Sep 2025 00:00:00 +0000</lastBuildDate>
+    <atom:link href="https://congyuxiaoyoudao.github.io/tags/slam/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>SLAM Biography I · Problem Formulation and Model Construction</title>
+      <link>https://congyuxiaoyoudao.github.io/posts/slam-biography/problem-formulation-and-model-construction/</link>
+      <pubDate>Thu, 25 Sep 2025 00:00:00 +0000</pubDate>
+      <guid>https://congyuxiaoyoudao.github.io/posts/slam-biography/problem-formulation-and-model-construction/</guid>
+      <description>&lt;blockquote&gt;
+&lt;p&gt;本文及其所属的专栏是笔者阅读学习高翔博士视觉 SLAM 十四讲的产物，看书跑代码总是匆匆而过，写点笔记加深印象。本来的打算是按书的节奏依次为每章做总结，但最后觉得这样效率太低且不够连贯，还是凭自己的思路写下去。观前提示，这一部分偏向理论，不可避免地文字会比较多&lt;/p&gt;&lt;/blockquote&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;0x00-to-begin-with&#34;&gt;0x00 To begin with&lt;/h2&gt;
+&lt;p&gt;这篇文章将会包含以下内容：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;input checked=&#34;&#34; disabled=&#34;&#34; type=&#34;checkbox&#34;&gt; 什么是 SLAM 问题&lt;/li&gt;
+&lt;li&gt;&lt;input checked=&#34;&#34; disabled=&#34;&#34; type=&#34;checkbox&#34;&gt; SLAM 问题的数学模型&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;strong&gt;For reference&lt;/strong&gt;：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;视觉 SLAM 十四讲视频课程：
+
+
+
+
+
+
+
+  
+  &lt;a href=&#34;https://www.bilibili.com/video/BV16t411g7FR&#34;&gt;【高翔】视觉SLAM十四讲&lt;/a&gt;
+
+&lt;/li&gt;
+&lt;li&gt;视觉 SLAM 十四讲配套代码仓库：
+
+
+
+
+
+
+
+  
+  &lt;a href=&#34;https://github.com/gaoxiang12/slambook2&#34;&gt;gaoxiang12/slambook2: edition 2 of the slambook&lt;/a&gt;
+
+&lt;/li&gt;
+&lt;li&gt;个人学习代码仓库：
+
+
+
+
+
+
+
+  
+  &lt;a href=&#34;https://github.com/congyuxiaoyoudao/learn-slambook2&#34;&gt;congyuxiaoyoudao/learn-slambook2: Learn Basic Knowledge on Visual SLAM: From Theory to Practice 2nd edition by Xiang Gao&lt;/a&gt;
+
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;0x01-何为-slam-what-is-slam&#34;&gt;0x01 何为 SLAM？ What is SLAM&lt;/h2&gt;
+&lt;blockquote&gt;
+&lt;p&gt;认识任何一个事物或者技术总是可以从两个角度出发：它是什么以及它能做什么？&lt;/p&gt;&lt;/blockquote&gt;
+&lt;p&gt;SLAM，全称为 Simultaneous Localization and Mapping，翻译过来就是同步定位与建图。它要求携带传感器的主体（例如运动机器人），在环境信息未知的情况下，通过自身在环境中的运动同步估计运动过程并建立环境的模型。这样来看，SLAM 的核心问题有二：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;定位（Localization）：携带传感器的主体需要通过传感器感知环境信息判断自身的状态（位姿）；&lt;/li&gt;
+&lt;li&gt;建图（Mapping）：主体基于自身连续轨迹上的观测数据，逐步建立环境地图；&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;此外，这两个问题间还有一个实时性的要求，即 Simultaneous（同步），同步地完成定位与建图，而非先进行信息采集再将数据传送回去做全局的估计和优化（那样耗时和局限就比较大，也就没意义了）。&lt;/p&gt;
+&lt;p&gt;在 SLAM 问题中，传感器作为运动主体感知环境的唯一途径，承担了从环境中获取观测数据的作用。传感器的不同意味着观测数据不同，也将 SLAM 问题分为不同类别，常见的如以相机为主要传感器的视觉 SLAM（Visual SLAM）和以激光雷达为主要传感器的激光 SLAM（LiDAR SLAM）等。在视觉 SLAM 的背景下，SLAM 问题就变成了从一系列连续图像中估计相机位姿，并基于图像特征等信息构建环境地图的过程。&lt;/p&gt;</description>
+    </item>
+  </channel>
+</rss>
