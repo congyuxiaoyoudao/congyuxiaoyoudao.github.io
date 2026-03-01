@@ -4,8 +4,8 @@
     <title>SLAM on The Only Problem&#39;s Blog</title>
     <link>https://congyuxiaoyoudao.github.io/tags/slam/</link>
     <description>Recent content in SLAM on The Only Problem&#39;s Blog</description>
-    <generator>Hugo -- 0.151.0</generator>
-    <language>zh</language>
+    <generator>Hugo -- 0.157.0</generator>
+    <language>en-us</language>
     <lastBuildDate>Thu, 25 Sep 2025 00:00:00 +0000</lastBuildDate>
     <atom:link href="https://congyuxiaoyoudao.github.io/tags/slam/index.xml" rel="self" type="application/rss+xml" />
     <item>
@@ -14,7 +14,8 @@
       <pubDate>Thu, 25 Sep 2025 00:00:00 +0000</pubDate>
       <guid>https://congyuxiaoyoudao.github.io/posts/slam-biography/problem-formulation-and-model-construction/</guid>
       <description>&lt;blockquote&gt;
-&lt;p&gt;本文及其所属的专栏是笔者阅读学习高翔博士视觉 SLAM 十四讲的产物，看书跑代码总是匆匆而过，写点笔记加深印象。本来的打算是按书的节奏依次为每章做总结，但最后觉得这样效率太低且不够连贯，还是凭自己的思路写下去。观前提示，这一部分偏向理论，不可避免地文字会比较多&lt;/p&gt;&lt;/blockquote&gt;
+&lt;p&gt;本文及其所属的专栏是笔者阅读学习高翔博士视觉 SLAM 十四讲的产物，看书跑代码总是匆匆而过，写点笔记加深印象。本来的打算是按书的节奏依次为每章做总结，但最后觉得这样效率太低且不够连贯，还是凭自己的思路写下去。观前提示，这一部分偏向理论，不可避免地文字会比较多&lt;/p&gt;
+&lt;/blockquote&gt;
 &lt;hr&gt;
 &lt;h2 id=&#34;0x00-to-begin-with&#34;&gt;0x00 To begin with&lt;/h2&gt;
 &lt;p&gt;这篇文章将会包含以下内容：&lt;/p&gt;
@@ -64,7 +65,8 @@
 &lt;hr&gt;
 &lt;h2 id=&#34;0x01-何为-slam-what-is-slam&#34;&gt;0x01 何为 SLAM？ What is SLAM&lt;/h2&gt;
 &lt;blockquote&gt;
-&lt;p&gt;认识任何一个事物或者技术总是可以从两个角度出发：它是什么以及它能做什么？&lt;/p&gt;&lt;/blockquote&gt;
+&lt;p&gt;认识任何一个事物或者技术总是可以从两个角度出发：它是什么以及它能做什么？&lt;/p&gt;
+&lt;/blockquote&gt;
 &lt;p&gt;SLAM，全称为 Simultaneous Localization and Mapping，翻译过来就是同步定位与建图。它要求携带传感器的主体（例如运动机器人），在环境信息未知的情况下，通过自身在环境中的运动同步估计运动过程并建立环境的模型。这样来看，SLAM 的核心问题有二：&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;定位（Localization）：携带传感器的主体需要通过传感器感知环境信息判断自身的状态（位姿）；&lt;/li&gt;

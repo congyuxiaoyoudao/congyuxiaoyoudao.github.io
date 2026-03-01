@@ -4,8 +4,8 @@
     <title>GAMES202 on The Only Problem&#39;s Blog</title>
     <link>https://congyuxiaoyoudao.github.io/tags/games202/</link>
     <description>Recent content in GAMES202 on The Only Problem&#39;s Blog</description>
-    <generator>Hugo -- 0.151.0</generator>
-    <language>zh</language>
+    <generator>Hugo -- 0.157.0</generator>
+    <language>en-us</language>
     <lastBuildDate>Mon, 16 Jun 2025 00:00:00 +0000</lastBuildDate>
     <atom:link href="https://congyuxiaoyoudao.github.io/tags/games202/index.xml" rel="self" type="application/rss+xml" />
     <item>
@@ -14,7 +14,8 @@
       <pubDate>Mon, 16 Jun 2025 00:00:00 +0000</pubDate>
       <guid>https://congyuxiaoyoudao.github.io/posts/assignments/games202-homework-5/</guid>
       <description>&lt;blockquote&gt;
-&lt;p&gt;202 系列完结撒花 ✿✿ヽ(°▽°)ノ✿！&lt;/p&gt;&lt;/blockquote&gt;
+&lt;p&gt;202 系列完结撒花 ✿✿ヽ(°▽°)ノ✿！&lt;/p&gt;
+&lt;/blockquote&gt;
 &lt;hr&gt;
 &lt;h2 id=&#34;0x00-to-begin-with&#34;&gt;0x00 To begin with&lt;/h2&gt;
 &lt;p&gt;这篇文章将会包含以下内容：&lt;/p&gt;
@@ -74,7 +75,8 @@
 &lt;/li&gt;
 &lt;/ul&gt;
 &lt;blockquote&gt;
-&lt;p&gt;master 分支上是 202 全部作业汇总，working 分支用于提交代码。需要原始作业可下载 master 分支的包&lt;/p&gt;&lt;/blockquote&gt;
+&lt;p&gt;master 分支上是 202 全部作业汇总，working 分支用于提交代码。需要原始作业可下载 master 分支的包&lt;/p&gt;
+&lt;/blockquote&gt;
 &lt;hr&gt;
 &lt;h2 id=&#34;0x01-问题修复-troubleshooting&#34;&gt;0x01 问题修复 TroubleShooting&lt;/h2&gt;
 &lt;p&gt;做作业时遇到一些出现问题的地方，这里一并提一下：&lt;/p&gt;
@@ -98,7 +100,8 @@
       <pubDate>Sat, 14 Jun 2025 00:00:00 +0000</pubDate>
       <guid>https://congyuxiaoyoudao.github.io/posts/assignments/games202-homework-4/</guid>
       <description>&lt;blockquote&gt;
-&lt;p&gt;好久不见！最近在忙别的工作，这几天难得有时间，赶紧把 202 系列作业做个收尾ε٩(๑&amp;gt; ₃ &amp;lt;)۶з！&lt;/p&gt;&lt;/blockquote&gt;
+&lt;p&gt;好久不见！最近在忙别的工作，这几天难得有时间，赶紧把 202 系列作业做个收尾ε٩(๑&amp;gt; ₃ &amp;lt;)۶з！&lt;/p&gt;
+&lt;/blockquote&gt;
 &lt;hr&gt;
 &lt;h2 id=&#34;0x00-to-begin-with&#34;&gt;0x00 To begin with&lt;/h2&gt;
 &lt;p&gt;这篇文章将会包含以下内容：&lt;/p&gt;
@@ -146,7 +149,8 @@
 &lt;/li&gt;
 &lt;/ul&gt;
 &lt;blockquote&gt;
-&lt;p&gt;master 分支上是 202 全部作业汇总，working 分支用于提交代码。需要原始作业可下载 master 分支的包&lt;/p&gt;&lt;/blockquote&gt;
+&lt;p&gt;master 分支上是 202 全部作业汇总，working 分支用于提交代码。需要原始作业可下载 master 分支的包&lt;/p&gt;
+&lt;/blockquote&gt;
 &lt;hr&gt;
 &lt;h2 id=&#34;0x01-课程回顾-recap&#34;&gt;0x01 课程回顾 Recap&lt;/h2&gt;
 &lt;h3 id=&#34;能量守恒的-bsdf-energy-preserving-bsdfs&#34;&gt;能量守恒的 BSDF Energy-Preserving BSDFs&lt;/h3&gt;
@@ -160,7 +164,8 @@
       <pubDate>Sat, 10 May 2025 00:00:00 +0000</pubDate>
       <guid>https://congyuxiaoyoudao.github.io/posts/assignments/games202-homework-3/</guid>
       <description>&lt;blockquote&gt;
-&lt;p&gt;HiZ 还在施工中……&lt;/p&gt;&lt;/blockquote&gt;
+&lt;p&gt;HiZ 还在施工中……&lt;/p&gt;
+&lt;/blockquote&gt;
 &lt;hr&gt;
 &lt;h2 id=&#34;0x00-to-begin-with&#34;&gt;0x00 To begin with&lt;/h2&gt;
 &lt;p&gt;这篇文章将会包含以下内容：&lt;/p&gt;
@@ -196,7 +201,8 @@
 &lt;/li&gt;
 &lt;/ul&gt;
 &lt;blockquote&gt;
-&lt;p&gt;master 分支上是 202 全部作业汇总，working 分支用于提交代码。需要原始作业可下载 master 分支的包&lt;/p&gt;&lt;/blockquote&gt;
+&lt;p&gt;master 分支上是 202 全部作业汇总，working 分支用于提交代码。需要原始作业可下载 master 分支的包&lt;/p&gt;
+&lt;/blockquote&gt;
 &lt;hr&gt;
 &lt;h2 id=&#34;0x01-课程回顾-recap&#34;&gt;0x01 课程回顾 Recap&lt;/h2&gt;
 &lt;p&gt;SSR（Screen Space Reflection）是一种基于屏幕空间的反射算法，也被应用于模拟全局光照。因为是屏幕空间的算法，不能且无需像传统全局光照算法那样需要获取场景的原始几何信息，而是只在当前相机的视野范围计算反射，所以效率相对较高，但也存在一些屏幕空间的 Artifacts。&lt;/p&gt;
@@ -206,7 +212,8 @@
 &lt;li&gt;所有被直接光照亮的物体（在屏幕空间中则表现为像素），都可以作为次级光源参与对反射的贡献；&lt;/li&gt;
 &lt;/ol&gt;
 &lt;blockquote&gt;
-&lt;p&gt;SSR 对反射表面没有要求，即不仅能模拟镜面反射，还可以模拟各种粗糙度的反射&lt;/p&gt;&lt;/blockquote&gt;
+&lt;p&gt;SSR 对反射表面没有要求，即不仅能模拟镜面反射，还可以模拟各种粗糙度的反射&lt;/p&gt;
+&lt;/blockquote&gt;
 &lt;p&gt;&lt;img alt=&#34;重用屏幕空间信息 GAMES202&#34; loading=&#34;lazy&#34; src=&#34;https://raw.gitmirror.com/congyuxiaoyoudao/Picgo-ImageBed/main/Assignments/Assignment%206.GAMES202HW3/202505192155513.png#center&#34;&gt;&lt;/p&gt;
 &lt;p&gt;SSR 算法的步骤如下：&lt;/p&gt;
 &lt;ol&gt;
@@ -221,7 +228,9 @@
 &lt;p&gt;&lt;img alt=&#34;层级光线追踪 GAMES202&#34; loading=&#34;lazy&#34; src=&#34;https://raw.gitmirror.com/congyuxiaoyoudao/Picgo-ImageBed/main/Assignments/Assignment%206.GAMES202HW3/202505192226586.png#center&#34;&gt;&lt;/p&gt;
 &lt;p&gt;说到实时渲染中的一些动态操作，几乎就离不开预处理。同样的，这种方法运行的前提是，光线需要知道行进的“最大安全距离”，即可以迈多大的步子而不与场景发生相交。&lt;/p&gt;
 &lt;blockquote&gt;
-&lt;p&gt;这里最大安全距离是类比 SDF 的说法，或者应该说当前层级规定的步长&lt;/p&gt;</description>
+&lt;p&gt;这里最大安全距离是类比 SDF 的说法，或者应该说当前层级规定的步长&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;一种实现它的方法是预先生成深度图的 Mip-Map，这里四个像素的最小值作为 Mip 生成的逻辑，具体原因涉及到比较的保号性：如果光线与上一级 Mip 都不相交（$D_{ray}&lt;D_{M_{i+1}}$），则其一定与下级不相交（$D_{ray}&lt;any_{4}\{D_{M_{i}}\}$ ）。&lt;/p&gt;</description>
     </item>
     <item>
       <title>Assignment 5. GAMES202 Homework 2</title>
@@ -229,7 +238,8 @@
       <pubDate>Sat, 19 Apr 2025 00:00:00 +0000</pubDate>
       <guid>https://congyuxiaoyoudao.github.io/posts/assignments/games202-homework-2/</guid>
       <description>&lt;blockquote&gt;
-&lt;p&gt;(∩^o^)⊃━☆ﾟ.*･｡&lt;/p&gt;&lt;/blockquote&gt;
+&lt;p&gt;(∩^o^)⊃━☆ﾟ.*･｡&lt;/p&gt;
+&lt;/blockquote&gt;
 &lt;hr&gt;
 &lt;h2 id=&#34;0x00-to-begin-with&#34;&gt;0x00 To begin with&lt;/h2&gt;
 &lt;p&gt;这篇文章将会包含以下内容：&lt;/p&gt;
@@ -289,7 +299,8 @@
 &lt;/li&gt;
 &lt;/ul&gt;
 &lt;blockquote&gt;
-&lt;p&gt;master 分支上是 202 全部作业汇总，working 分支用于提交代码。需要原始作业可下载 master 分支的包&lt;/p&gt;&lt;/blockquote&gt;
+&lt;p&gt;master 分支上是 202 全部作业汇总，working 分支用于提交代码。需要原始作业可下载 master 分支的包&lt;/p&gt;
+&lt;/blockquote&gt;
 &lt;hr&gt;
 &lt;h2 id=&#34;0x01-前置准备-warm-up&#34;&gt;0x01 前置准备 Warm Up&lt;/h2&gt;
 &lt;h3 id=&#34;渲染方程-render-equation&#34;&gt;渲染方程 Render Equation&lt;/h3&gt;
@@ -338,7 +349,8 @@ $$&lt;/div&gt;
 &lt;/li&gt;
 &lt;/ul&gt;
 &lt;blockquote&gt;
-&lt;p&gt;master 分支上是 202 全部作业汇总，working 分支用于提交代码。需要原始作业可下载 master 分支的包&lt;/p&gt;&lt;/blockquote&gt;
+&lt;p&gt;master 分支上是 202 全部作业汇总，working 分支用于提交代码。需要原始作业可下载 master 分支的包&lt;/p&gt;
+&lt;/blockquote&gt;
 &lt;hr&gt;
 &lt;h2 id=&#34;0x01-shadow-map&#34;&gt;0x01 Shadow Map&lt;/h2&gt;
 &lt;p&gt;完成两个任务点：&lt;/p&gt;
@@ -374,7 +386,8 @@ $$&lt;/div&gt;
       <pubDate>Mon, 07 Apr 2025 00:00:00 +0000</pubDate>
       <guid>https://congyuxiaoyoudao.github.io/posts/assignments/games202-homework-0/</guid>
       <description>&lt;blockquote&gt;
-&lt;p&gt;开个新坑，之前囫囵吞枣地过了一遍 202，现在忘得差不多了，该捡起来。正好给枯燥的生活增添一点色彩（？），最近比较忙但还是争取一周做一个作业&lt;/p&gt;&lt;/blockquote&gt;
+&lt;p&gt;开个新坑，之前囫囵吞枣地过了一遍 202，现在忘得差不多了，该捡起来。正好给枯燥的生活增添一点色彩（？），最近比较忙但还是争取一周做一个作业&lt;/p&gt;
+&lt;/blockquote&gt;
 &lt;hr&gt;
 &lt;h2 id=&#34;-0x00-to-begin-with&#34;&gt;🚩 0x00 To begin with&lt;/h2&gt;
 &lt;p&gt;这篇文章将会包含以下内容：&lt;/p&gt;
@@ -410,7 +423,8 @@ $$&lt;/div&gt;
 &lt;/li&gt;
 &lt;/ul&gt;
 &lt;blockquote&gt;
-&lt;p&gt;master 分支上是 202 全部作业汇总，working 分支用于提交代码。需要原始作业可下载 master 分支的包&lt;/p&gt;&lt;/blockquote&gt;
+&lt;p&gt;master 分支上是 202 全部作业汇总，working 分支用于提交代码。需要原始作业可下载 master 分支的包&lt;/p&gt;
+&lt;/blockquote&gt;
 &lt;hr&gt;
 &lt;h2 id=&#34;-0x01-configuration-环境配置&#34;&gt;⚙️ 0x01 Configuration 环境配置&lt;/h2&gt;
 &lt;p&gt;选择使用 VSCode 插件搭建本地服务器，在扩展中搜索 Live Server，安装此插件。&lt;/p&gt;
@@ -423,7 +437,8 @@ $$&lt;/div&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;hr&gt;
 &lt;h2 id=&#34;-0x02-blinn-phong-shading-model&#34;&gt;🤔 0x02 Blinn-Phong Shading Model&lt;/h2&gt;
 &lt;blockquote&gt;
-&lt;p&gt;没什么好说的，CV 工程师&lt;/p&gt;&lt;/blockquote&gt;
+&lt;p&gt;没什么好说的，CV 工程师&lt;/p&gt;
+&lt;/blockquote&gt;
 &lt;h3 id=&#34;使用-glsl-编写-shader&#34;&gt;&lt;strong&gt;使用 GLSL 编写 Shader&lt;/strong&gt;&lt;/h3&gt;
 &lt;p&gt;如果使用字符串的方式引入 Shader，就在 InternalShader.js 中加上：&lt;/p&gt;</description>
     </item>

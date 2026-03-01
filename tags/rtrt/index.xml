@@ -4,8 +4,8 @@
     <title>RTRT on The Only Problem&#39;s Blog</title>
     <link>https://congyuxiaoyoudao.github.io/tags/rtrt/</link>
     <description>Recent content in RTRT on The Only Problem&#39;s Blog</description>
-    <generator>Hugo -- 0.151.0</generator>
-    <language>zh</language>
+    <generator>Hugo -- 0.157.0</generator>
+    <language>en-us</language>
     <lastBuildDate>Mon, 16 Jun 2025 00:00:00 +0000</lastBuildDate>
     <atom:link href="https://congyuxiaoyoudao.github.io/tags/rtrt/index.xml" rel="self" type="application/rss+xml" />
     <item>
@@ -14,7 +14,8 @@
       <pubDate>Mon, 16 Jun 2025 00:00:00 +0000</pubDate>
       <guid>https://congyuxiaoyoudao.github.io/posts/assignments/games202-homework-5/</guid>
       <description>&lt;blockquote&gt;
-&lt;p&gt;202 系列完结撒花 ✿✿ヽ(°▽°)ノ✿！&lt;/p&gt;&lt;/blockquote&gt;
+&lt;p&gt;202 系列完结撒花 ✿✿ヽ(°▽°)ノ✿！&lt;/p&gt;
+&lt;/blockquote&gt;
 &lt;hr&gt;
 &lt;h2 id=&#34;0x00-to-begin-with&#34;&gt;0x00 To begin with&lt;/h2&gt;
 &lt;p&gt;这篇文章将会包含以下内容：&lt;/p&gt;
@@ -74,7 +75,8 @@
 &lt;/li&gt;
 &lt;/ul&gt;
 &lt;blockquote&gt;
-&lt;p&gt;master 分支上是 202 全部作业汇总，working 分支用于提交代码。需要原始作业可下载 master 分支的包&lt;/p&gt;&lt;/blockquote&gt;
+&lt;p&gt;master 分支上是 202 全部作业汇总，working 分支用于提交代码。需要原始作业可下载 master 分支的包&lt;/p&gt;
+&lt;/blockquote&gt;
 &lt;hr&gt;
 &lt;h2 id=&#34;0x01-问题修复-troubleshooting&#34;&gt;0x01 问题修复 TroubleShooting&lt;/h2&gt;
 &lt;p&gt;做作业时遇到一些出现问题的地方，这里一并提一下：&lt;/p&gt;

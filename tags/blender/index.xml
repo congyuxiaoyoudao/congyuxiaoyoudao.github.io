@@ -4,8 +4,8 @@
     <title>Blender on The Only Problem&#39;s Blog</title>
     <link>https://congyuxiaoyoudao.github.io/tags/blender/</link>
     <description>Recent content in Blender on The Only Problem&#39;s Blog</description>
-    <generator>Hugo -- 0.151.0</generator>
-    <language>zh</language>
+    <generator>Hugo -- 0.157.0</generator>
+    <language>en-us</language>
     <lastBuildDate>Mon, 31 Mar 2025 00:00:00 +0000</lastBuildDate>
     <atom:link href="https://congyuxiaoyoudao.github.io/tags/blender/index.xml" rel="self" type="application/rss+xml" />
     <item>
@@ -14,7 +14,8 @@
       <pubDate>Mon, 31 Mar 2025 00:00:00 +0000</pubDate>
       <guid>https://congyuxiaoyoudao.github.io/posts/interludes/manga-speed-lines/</guid>
       <description>&lt;blockquote&gt;
-&lt;p&gt;偶然用 shader 乱搓出的一个类似漫画风格的放射线效果，实际上还有很多缺陷，权且当思路分享了&lt;/p&gt;&lt;/blockquote&gt;
+&lt;p&gt;偶然用 shader 乱搓出的一个类似漫画风格的放射线效果，实际上还有很多缺陷，权且当思路分享了&lt;/p&gt;
+&lt;/blockquote&gt;
 &lt;hr&gt;
 &lt;h2 id=&#34;-0x00-to-begin-with&#34;&gt;🚩 0x00 To begin with&lt;/h2&gt;
 &lt;p&gt;这篇文章将会包含以下内容：&lt;/p&gt;

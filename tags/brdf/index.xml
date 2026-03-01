@@ -4,8 +4,8 @@
     <title>BRDF on The Only Problem&#39;s Blog</title>
     <link>https://congyuxiaoyoudao.github.io/tags/brdf/</link>
     <description>Recent content in BRDF on The Only Problem&#39;s Blog</description>
-    <generator>Hugo -- 0.151.0</generator>
-    <language>zh</language>
+    <generator>Hugo -- 0.157.0</generator>
+    <language>en-us</language>
     <lastBuildDate>Sat, 14 Jun 2025 00:00:00 +0000</lastBuildDate>
     <atom:link href="https://congyuxiaoyoudao.github.io/tags/brdf/index.xml" rel="self" type="application/rss+xml" />
     <item>
@@ -14,7 +14,8 @@
       <pubDate>Sat, 14 Jun 2025 00:00:00 +0000</pubDate>
       <guid>https://congyuxiaoyoudao.github.io/posts/assignments/games202-homework-4/</guid>
       <description>&lt;blockquote&gt;
-&lt;p&gt;好久不见！最近在忙别的工作，这几天难得有时间，赶紧把 202 系列作业做个收尾ε٩(๑&amp;gt; ₃ &amp;lt;)۶з！&lt;/p&gt;&lt;/blockquote&gt;
+&lt;p&gt;好久不见！最近在忙别的工作，这几天难得有时间，赶紧把 202 系列作业做个收尾ε٩(๑&amp;gt; ₃ &amp;lt;)۶з！&lt;/p&gt;
+&lt;/blockquote&gt;
 &lt;hr&gt;
 &lt;h2 id=&#34;0x00-to-begin-with&#34;&gt;0x00 To begin with&lt;/h2&gt;
 &lt;p&gt;这篇文章将会包含以下内容：&lt;/p&gt;
@@ -62,7 +63,8 @@
 &lt;/li&gt;
 &lt;/ul&gt;
 &lt;blockquote&gt;
-&lt;p&gt;master 分支上是 202 全部作业汇总，working 分支用于提交代码。需要原始作业可下载 master 分支的包&lt;/p&gt;&lt;/blockquote&gt;
+&lt;p&gt;master 分支上是 202 全部作业汇总，working 分支用于提交代码。需要原始作业可下载 master 分支的包&lt;/p&gt;
+&lt;/blockquote&gt;
 &lt;hr&gt;
 &lt;h2 id=&#34;0x01-课程回顾-recap&#34;&gt;0x01 课程回顾 Recap&lt;/h2&gt;
 &lt;h3 id=&#34;能量守恒的-bsdf-energy-preserving-bsdfs&#34;&gt;能量守恒的 BSDF Energy-Preserving BSDFs&lt;/h3&gt;

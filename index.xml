@@ -4,8 +4,8 @@
     <title>The Only Problem&#39;s Blog</title>
     <link>https://congyuxiaoyoudao.github.io/</link>
     <description>Recent content on The Only Problem&#39;s Blog</description>
-    <generator>Hugo -- 0.151.0</generator>
-    <language>zh</language>
+    <generator>Hugo -- 0.157.0</generator>
+    <language>en-us</language>
     <lastBuildDate>Thu, 25 Sep 2025 00:00:00 +0000</lastBuildDate>
     <atom:link href="https://congyuxiaoyoudao.github.io/index.xml" rel="self" type="application/rss+xml" />
     <item>
@@ -14,7 +14,8 @@
       <pubDate>Thu, 25 Sep 2025 00:00:00 +0000</pubDate>
       <guid>https://congyuxiaoyoudao.github.io/posts/slam-biography/problem-formulation-and-model-construction/</guid>
       <description>&lt;blockquote&gt;
-&lt;p&gt;本文及其所属的专栏是笔者阅读学习高翔博士视觉 SLAM 十四讲的产物，看书跑代码总是匆匆而过，写点笔记加深印象。本来的打算是按书的节奏依次为每章做总结，但最后觉得这样效率太低且不够连贯，还是凭自己的思路写下去。观前提示，这一部分偏向理论，不可避免地文字会比较多&lt;/p&gt;&lt;/blockquote&gt;
+&lt;p&gt;本文及其所属的专栏是笔者阅读学习高翔博士视觉 SLAM 十四讲的产物，看书跑代码总是匆匆而过，写点笔记加深印象。本来的打算是按书的节奏依次为每章做总结，但最后觉得这样效率太低且不够连贯，还是凭自己的思路写下去。观前提示，这一部分偏向理论，不可避免地文字会比较多&lt;/p&gt;
+&lt;/blockquote&gt;
 &lt;hr&gt;
 &lt;h2 id=&#34;0x00-to-begin-with&#34;&gt;0x00 To begin with&lt;/h2&gt;
 &lt;p&gt;这篇文章将会包含以下内容：&lt;/p&gt;
@@ -64,7 +65,8 @@
 &lt;hr&gt;
 &lt;h2 id=&#34;0x01-何为-slam-what-is-slam&#34;&gt;0x01 何为 SLAM？ What is SLAM&lt;/h2&gt;
 &lt;blockquote&gt;
-&lt;p&gt;认识任何一个事物或者技术总是可以从两个角度出发：它是什么以及它能做什么？&lt;/p&gt;&lt;/blockquote&gt;
+&lt;p&gt;认识任何一个事物或者技术总是可以从两个角度出发：它是什么以及它能做什么？&lt;/p&gt;
+&lt;/blockquote&gt;
 &lt;p&gt;SLAM，全称为 Simultaneous Localization and Mapping，翻译过来就是同步定位与建图。它要求携带传感器的主体（例如运动机器人），在环境信息未知的情况下，通过自身在环境中的运动同步估计运动过程并建立环境的模型。这样来看，SLAM 的核心问题有二：&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;定位（Localization）：携带传感器的主体需要通过传感器感知环境信息判断自身的状态（位姿）；&lt;/li&gt;
@@ -171,7 +173,8 @@ $$&lt;/div&gt;
       <pubDate>Wed, 02 Jul 2025 00:00:00 +0000</pubDate>
       <guid>https://congyuxiaoyoudao.github.io/posts/interludes/estimatenormals/</guid>
       <description>&lt;blockquote&gt;
-&lt;p&gt;3DGS 的原论文中，每个高斯是不存法线信息的，然而后续工作中，也有研究人员将法线和 BRDF 信息进行训练，这样一来，就可以在后续的光栅化过程中输出 GBuffer，完成 relighting 的任务。生成初始法线，可以仅考虑高斯的均值，基于局部平面假设进行估计。&lt;/p&gt;&lt;/blockquote&gt;
+&lt;p&gt;3DGS 的原论文中，每个高斯是不存法线信息的，然而后续工作中，也有研究人员将法线和 BRDF 信息进行训练，这样一来，就可以在后续的光栅化过程中输出 GBuffer，完成 relighting 的任务。生成初始法线，可以仅考虑高斯的均值，基于局部平面假设进行估计。&lt;/p&gt;
+&lt;/blockquote&gt;
 &lt;hr&gt;
 &lt;h2 id=&#34;0x00-to-begin-with&#34;&gt;0x00 To begin with&lt;/h2&gt;
 &lt;p&gt;这篇文章将会包含以下内容：&lt;/p&gt;
@@ -252,7 +255,8 @@ Face List  // list of data for each face
       <pubDate>Mon, 30 Jun 2025 00:00:00 +0000</pubDate>
       <guid>https://congyuxiaoyoudao.github.io/posts/interludes/webgpu-from-scratch/</guid>
       <description>&lt;blockquote&gt;
-&lt;p&gt;从导师那里听说了 WebGPU，做了点调查发现这个 API 还挺新的，正好之前只零零碎碎学了一点 OpenGL，相比于不适合人类学的 Vulkan，还是 WebGPU 显得友好一点。&lt;/p&gt;&lt;/blockquote&gt;
+&lt;p&gt;从导师那里听说了 WebGPU，做了点调查发现这个 API 还挺新的，正好之前只零零碎碎学了一点 OpenGL，相比于不适合人类学的 Vulkan，还是 WebGPU 显得友好一点。&lt;/p&gt;
+&lt;/blockquote&gt;
 &lt;hr&gt;
 &lt;h2 id=&#34;-0x00-to-begin-with&#34;&gt;🚩 0x00 To begin with&lt;/h2&gt;
 &lt;p&gt;这篇文章将会包含以下内容：&lt;/p&gt;
@@ -347,7 +351,8 @@ Face List  // list of data for each face
       <pubDate>Mon, 16 Jun 2025 00:00:00 +0000</pubDate>
       <guid>https://congyuxiaoyoudao.github.io/posts/assignments/games202-homework-5/</guid>
       <description>&lt;blockquote&gt;
-&lt;p&gt;202 系列完结撒花 ✿✿ヽ(°▽°)ノ✿！&lt;/p&gt;&lt;/blockquote&gt;
+&lt;p&gt;202 系列完结撒花 ✿✿ヽ(°▽°)ノ✿！&lt;/p&gt;
+&lt;/blockquote&gt;
 &lt;hr&gt;
 &lt;h2 id=&#34;0x00-to-begin-with&#34;&gt;0x00 To begin with&lt;/h2&gt;
 &lt;p&gt;这篇文章将会包含以下内容：&lt;/p&gt;
@@ -407,7 +412,8 @@ Face List  // list of data for each face
 &lt;/li&gt;
 &lt;/ul&gt;
 &lt;blockquote&gt;
-&lt;p&gt;master 分支上是 202 全部作业汇总，working 分支用于提交代码。需要原始作业可下载 master 分支的包&lt;/p&gt;&lt;/blockquote&gt;
+&lt;p&gt;master 分支上是 202 全部作业汇总，working 分支用于提交代码。需要原始作业可下载 master 分支的包&lt;/p&gt;
+&lt;/blockquote&gt;
 &lt;hr&gt;
 &lt;h2 id=&#34;0x01-问题修复-troubleshooting&#34;&gt;0x01 问题修复 TroubleShooting&lt;/h2&gt;
 &lt;p&gt;做作业时遇到一些出现问题的地方，这里一并提一下：&lt;/p&gt;
@@ -431,7 +437,8 @@ Face List  // list of data for each face
       <pubDate>Sat, 14 Jun 2025 00:00:00 +0000</pubDate>
       <guid>https://congyuxiaoyoudao.github.io/posts/assignments/games202-homework-4/</guid>
       <description>&lt;blockquote&gt;
-&lt;p&gt;好久不见！最近在忙别的工作，这几天难得有时间，赶紧把 202 系列作业做个收尾ε٩(๑&amp;gt; ₃ &amp;lt;)۶з！&lt;/p&gt;&lt;/blockquote&gt;
+&lt;p&gt;好久不见！最近在忙别的工作，这几天难得有时间，赶紧把 202 系列作业做个收尾ε٩(๑&amp;gt; ₃ &amp;lt;)۶з！&lt;/p&gt;
+&lt;/blockquote&gt;
 &lt;hr&gt;
 &lt;h2 id=&#34;0x00-to-begin-with&#34;&gt;0x00 To begin with&lt;/h2&gt;
 &lt;p&gt;这篇文章将会包含以下内容：&lt;/p&gt;
@@ -479,7 +486,8 @@ Face List  // list of data for each face
 &lt;/li&gt;
 &lt;/ul&gt;
 &lt;blockquote&gt;
-&lt;p&gt;master 分支上是 202 全部作业汇总，working 分支用于提交代码。需要原始作业可下载 master 分支的包&lt;/p&gt;&lt;/blockquote&gt;
+&lt;p&gt;master 分支上是 202 全部作业汇总，working 分支用于提交代码。需要原始作业可下载 master 分支的包&lt;/p&gt;
+&lt;/blockquote&gt;
 &lt;hr&gt;
 &lt;h2 id=&#34;0x01-课程回顾-recap&#34;&gt;0x01 课程回顾 Recap&lt;/h2&gt;
 &lt;h3 id=&#34;能量守恒的-bsdf-energy-preserving-bsdfs&#34;&gt;能量守恒的 BSDF Energy-Preserving BSDFs&lt;/h3&gt;
@@ -493,7 +501,8 @@ Face List  // list of data for each face
       <pubDate>Sat, 10 May 2025 00:00:00 +0000</pubDate>
       <guid>https://congyuxiaoyoudao.github.io/posts/assignments/games202-homework-3/</guid>
       <description>&lt;blockquote&gt;
-&lt;p&gt;HiZ 还在施工中……&lt;/p&gt;&lt;/blockquote&gt;
+&lt;p&gt;HiZ 还在施工中……&lt;/p&gt;
+&lt;/blockquote&gt;
 &lt;hr&gt;
 &lt;h2 id=&#34;0x00-to-begin-with&#34;&gt;0x00 To begin with&lt;/h2&gt;
 &lt;p&gt;这篇文章将会包含以下内容：&lt;/p&gt;
@@ -529,7 +538,8 @@ Face List  // list of data for each face
 &lt;/li&gt;
 &lt;/ul&gt;
 &lt;blockquote&gt;
-&lt;p&gt;master 分支上是 202 全部作业汇总，working 分支用于提交代码。需要原始作业可下载 master 分支的包&lt;/p&gt;&lt;/blockquote&gt;
+&lt;p&gt;master 分支上是 202 全部作业汇总，working 分支用于提交代码。需要原始作业可下载 master 分支的包&lt;/p&gt;
+&lt;/blockquote&gt;
 &lt;hr&gt;
 &lt;h2 id=&#34;0x01-课程回顾-recap&#34;&gt;0x01 课程回顾 Recap&lt;/h2&gt;
 &lt;p&gt;SSR（Screen Space Reflection）是一种基于屏幕空间的反射算法，也被应用于模拟全局光照。因为是屏幕空间的算法，不能且无需像传统全局光照算法那样需要获取场景的原始几何信息，而是只在当前相机的视野范围计算反射，所以效率相对较高，但也存在一些屏幕空间的 Artifacts。&lt;/p&gt;
@@ -539,7 +549,8 @@ Face List  // list of data for each face
 &lt;li&gt;所有被直接光照亮的物体（在屏幕空间中则表现为像素），都可以作为次级光源参与对反射的贡献；&lt;/li&gt;
 &lt;/ol&gt;
 &lt;blockquote&gt;
-&lt;p&gt;SSR 对反射表面没有要求，即不仅能模拟镜面反射，还可以模拟各种粗糙度的反射&lt;/p&gt;&lt;/blockquote&gt;
+&lt;p&gt;SSR 对反射表面没有要求，即不仅能模拟镜面反射，还可以模拟各种粗糙度的反射&lt;/p&gt;
+&lt;/blockquote&gt;
 &lt;p&gt;&lt;img alt=&#34;重用屏幕空间信息 GAMES202&#34; loading=&#34;lazy&#34; src=&#34;https://raw.gitmirror.com/congyuxiaoyoudao/Picgo-ImageBed/main/Assignments/Assignment%206.GAMES202HW3/202505192155513.png#center&#34;&gt;&lt;/p&gt;
 &lt;p&gt;SSR 算法的步骤如下：&lt;/p&gt;
 &lt;ol&gt;
@@ -554,7 +565,9 @@ Face List  // list of data for each face
 &lt;p&gt;&lt;img alt=&#34;层级光线追踪 GAMES202&#34; loading=&#34;lazy&#34; src=&#34;https://raw.gitmirror.com/congyuxiaoyoudao/Picgo-ImageBed/main/Assignments/Assignment%206.GAMES202HW3/202505192226586.png#center&#34;&gt;&lt;/p&gt;
 &lt;p&gt;说到实时渲染中的一些动态操作，几乎就离不开预处理。同样的，这种方法运行的前提是，光线需要知道行进的“最大安全距离”，即可以迈多大的步子而不与场景发生相交。&lt;/p&gt;
 &lt;blockquote&gt;
-&lt;p&gt;这里最大安全距离是类比 SDF 的说法，或者应该说当前层级规定的步长&lt;/p&gt;</description>
+&lt;p&gt;这里最大安全距离是类比 SDF 的说法，或者应该说当前层级规定的步长&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;一种实现它的方法是预先生成深度图的 Mip-Map，这里四个像素的最小值作为 Mip 生成的逻辑，具体原因涉及到比较的保号性：如果光线与上一级 Mip 都不相交（$D_{ray}&lt;D_{M_{i+1}}$），则其一定与下级不相交（$D_{ray}&lt;any_{4}\{D_{M_{i}}\}$ ）。&lt;/p&gt;</description>
     </item>
     <item>
       <title>Assignment 5. GAMES202 Homework 2</title>
@@ -562,7 +575,8 @@ Face List  // list of data for each face
       <pubDate>Sat, 19 Apr 2025 00:00:00 +0000</pubDate>
       <guid>https://congyuxiaoyoudao.github.io/posts/assignments/games202-homework-2/</guid>
       <description>&lt;blockquote&gt;
-&lt;p&gt;(∩^o^)⊃━☆ﾟ.*･｡&lt;/p&gt;&lt;/blockquote&gt;
+&lt;p&gt;(∩^o^)⊃━☆ﾟ.*･｡&lt;/p&gt;
+&lt;/blockquote&gt;
 &lt;hr&gt;
 &lt;h2 id=&#34;0x00-to-begin-with&#34;&gt;0x00 To begin with&lt;/h2&gt;
 &lt;p&gt;这篇文章将会包含以下内容：&lt;/p&gt;
@@ -622,7 +636,8 @@ Face List  // list of data for each face
 &lt;/li&gt;
 &lt;/ul&gt;
 &lt;blockquote&gt;
-&lt;p&gt;master 分支上是 202 全部作业汇总，working 分支用于提交代码。需要原始作业可下载 master 分支的包&lt;/p&gt;&lt;/blockquote&gt;
+&lt;p&gt;master 分支上是 202 全部作业汇总，working 分支用于提交代码。需要原始作业可下载 master 分支的包&lt;/p&gt;
+&lt;/blockquote&gt;
 &lt;hr&gt;
 &lt;h2 id=&#34;0x01-前置准备-warm-up&#34;&gt;0x01 前置准备 Warm Up&lt;/h2&gt;
 &lt;h3 id=&#34;渲染方程-render-equation&#34;&gt;渲染方程 Render Equation&lt;/h3&gt;
@@ -671,7 +686,8 @@ $$&lt;/div&gt;
 &lt;/li&gt;
 &lt;/ul&gt;
 &lt;blockquote&gt;
-&lt;p&gt;master 分支上是 202 全部作业汇总，working 分支用于提交代码。需要原始作业可下载 master 分支的包&lt;/p&gt;&lt;/blockquote&gt;
+&lt;p&gt;master 分支上是 202 全部作业汇总，working 分支用于提交代码。需要原始作业可下载 master 分支的包&lt;/p&gt;
+&lt;/blockquote&gt;
 &lt;hr&gt;
 &lt;h2 id=&#34;0x01-shadow-map&#34;&gt;0x01 Shadow Map&lt;/h2&gt;
 &lt;p&gt;完成两个任务点：&lt;/p&gt;
@@ -707,7 +723,8 @@ $$&lt;/div&gt;
       <pubDate>Mon, 07 Apr 2025 00:00:00 +0000</pubDate>
       <guid>https://congyuxiaoyoudao.github.io/posts/assignments/games202-homework-0/</guid>
       <description>&lt;blockquote&gt;
-&lt;p&gt;开个新坑，之前囫囵吞枣地过了一遍 202，现在忘得差不多了，该捡起来。正好给枯燥的生活增添一点色彩（？），最近比较忙但还是争取一周做一个作业&lt;/p&gt;&lt;/blockquote&gt;
+&lt;p&gt;开个新坑，之前囫囵吞枣地过了一遍 202，现在忘得差不多了，该捡起来。正好给枯燥的生活增添一点色彩（？），最近比较忙但还是争取一周做一个作业&lt;/p&gt;
+&lt;/blockquote&gt;
 &lt;hr&gt;
 &lt;h2 id=&#34;-0x00-to-begin-with&#34;&gt;🚩 0x00 To begin with&lt;/h2&gt;
 &lt;p&gt;这篇文章将会包含以下内容：&lt;/p&gt;
@@ -743,7 +760,8 @@ $$&lt;/div&gt;
 &lt;/li&gt;
 &lt;/ul&gt;
 &lt;blockquote&gt;
-&lt;p&gt;master 分支上是 202 全部作业汇总，working 分支用于提交代码。需要原始作业可下载 master 分支的包&lt;/p&gt;&lt;/blockquote&gt;
+&lt;p&gt;master 分支上是 202 全部作业汇总，working 分支用于提交代码。需要原始作业可下载 master 分支的包&lt;/p&gt;
+&lt;/blockquote&gt;
 &lt;hr&gt;
 &lt;h2 id=&#34;-0x01-configuration-环境配置&#34;&gt;⚙️ 0x01 Configuration 环境配置&lt;/h2&gt;
 &lt;p&gt;选择使用 VSCode 插件搭建本地服务器，在扩展中搜索 Live Server，安装此插件。&lt;/p&gt;
@@ -756,7 +774,8 @@ $$&lt;/div&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;hr&gt;
 &lt;h2 id=&#34;-0x02-blinn-phong-shading-model&#34;&gt;🤔 0x02 Blinn-Phong Shading Model&lt;/h2&gt;
 &lt;blockquote&gt;
-&lt;p&gt;没什么好说的，CV 工程师&lt;/p&gt;&lt;/blockquote&gt;
+&lt;p&gt;没什么好说的，CV 工程师&lt;/p&gt;
+&lt;/blockquote&gt;
 &lt;h3 id=&#34;使用-glsl-编写-shader&#34;&gt;&lt;strong&gt;使用 GLSL 编写 Shader&lt;/strong&gt;&lt;/h3&gt;
 &lt;p&gt;如果使用字符串的方式引入 Shader，就在 InternalShader.js 中加上：&lt;/p&gt;</description>
     </item>
@@ -766,7 +785,8 @@ $$&lt;/div&gt;
       <pubDate>Mon, 31 Mar 2025 00:00:00 +0000</pubDate>
       <guid>https://congyuxiaoyoudao.github.io/posts/interludes/manga-speed-lines/</guid>
       <description>&lt;blockquote&gt;
-&lt;p&gt;偶然用 shader 乱搓出的一个类似漫画风格的放射线效果，实际上还有很多缺陷，权且当思路分享了&lt;/p&gt;&lt;/blockquote&gt;
+&lt;p&gt;偶然用 shader 乱搓出的一个类似漫画风格的放射线效果，实际上还有很多缺陷，权且当思路分享了&lt;/p&gt;
+&lt;/blockquote&gt;
 &lt;hr&gt;
 &lt;h2 id=&#34;-0x00-to-begin-with&#34;&gt;🚩 0x00 To begin with&lt;/h2&gt;
 &lt;p&gt;这篇文章将会包含以下内容：&lt;/p&gt;
@@ -802,7 +822,8 @@ $$&lt;/div&gt;
       <pubDate>Fri, 28 Mar 2025 00:00:00 +0000</pubDate>
       <guid>https://congyuxiaoyoudao.github.io/posts/assignments/a-review-of-realistic-water-waveform-simulation/</guid>
       <description>&lt;blockquote&gt;
-&lt;p&gt;本着虚心交流与接受批评的态度，把这篇用来“应付”学校作业的综述写作放上来，不吝赐教！&lt;/p&gt;&lt;/blockquote&gt;
+&lt;p&gt;本着虚心交流与接受批评的态度，把这篇用来“应付”学校作业的综述写作放上来，不吝赐教！&lt;/p&gt;
+&lt;/blockquote&gt;
 &lt;hr&gt;
 &lt;h2 id=&#34;0x00-to-begin-with&#34;&gt;0x00 To begin with&lt;/h2&gt;
 &lt;p&gt;这篇文章将会包含以下内容：&lt;/p&gt;
@@ -868,7 +889,8 @@ $$&lt;/div&gt;
       <pubDate>Tue, 11 Mar 2025 00:00:00 +0000</pubDate>
       <guid>https://congyuxiaoyoudao.github.io/posts/interludes/toon-intergrated-bxdf/</guid>
       <description>&lt;blockquote&gt;
-&lt;p&gt;之前的几篇文章中，我们已经完成了Toon模型一些基本的Feature。在深入定制之前，我们必须冷静下来思考一下我们需要什么&lt;/p&gt;&lt;/blockquote&gt;
+&lt;p&gt;之前的几篇文章中，我们已经完成了Toon模型一些基本的Feature。在深入定制之前，我们必须冷静下来思考一下我们需要什么&lt;/p&gt;
+&lt;/blockquote&gt;
 &lt;hr&gt;
 &lt;h2 id=&#34;-0x00-to-begin-with&#34;&gt;🚩 0x00 To begin with&lt;/h2&gt;
 &lt;p&gt;这篇文章将会包含以下内容：&lt;/p&gt;
